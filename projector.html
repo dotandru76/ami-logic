@@ -938,6 +938,9 @@
 
     <!-- Core Interactive & Animation Engine -->
     <script>
+        // Realtime MQTT Room
+        const ROOM = "ami-asaf-logic-2026";
+
         // State
         const stationsState = { 1: false, 2: false, 3: false, 4: false };
         let soundEnabled = true;
@@ -1347,23 +1350,42 @@
             try {
                 mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
                     clientId: 'ami_projector_' + Math.random().toString(16).substr(2, 8),
-                    keepalive: 60
+                    keepalive: 60,
+                    reconnectPeriod: 3000
                 });
 
                 mqttClient.on('connect', () => {
-                    mqttClient.subscribe(`${ROOM}/unlock`);
-                    console.log("Teacher screen connected to MQTT broker");
+                    mqttClient.subscribe(`${ROOM}/unlock`, (err) => {
+                        if (!err) {
+                            console.log("SUCCESS: Subscribed to " + ROOM + "/unlock");
+                        } else {
+                            console.error("MQTT Subscribe error:", err);
+                        }
+                    });
                 });
 
                 mqttClient.on('message', (topic, message) => {
                     try {
+                        console.log("Received MQTT message on", topic, message.toString());
                         const data = JSON.parse(message.toString());
                         if (data && data.team) {
-                            teacherSolveStation(data.team);
+                            const teamNum = parseInt(data.team);
+                            if (teamNum >= 1 && teamNum <= 4) {
+                                console.log("Unlocking station for team", teamNum);
+                                teacherSolveStation(teamNum);
+                            }
                         }
-                    } catch(e){}
+                    } catch(e) {
+                        console.error("Error processing MQTT message:", e);
+                    }
                 });
-            } catch(e){}
+
+                mqttClient.on('error', (err) => {
+                    console.error("MQTT Client error:", err);
+                });
+            } catch(e) {
+                console.error("MQTT init exception:", e);
+            }
         }
 
         // 10-Minute Timer
