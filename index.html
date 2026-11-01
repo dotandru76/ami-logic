@@ -1,1 +1,629 @@
-<!DOCTYPE html><html><head><title>Ami Logic</title></head><body><h1>Ami Asaf Logic Machine</h1></body></html>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>שלט קבוצתי • המכונה הלוגית המופלאה</title>
+    <!-- MQTT.js CDN for live communication -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #090d16;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            direction: rtl;
+            padding: 14px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #1e293b;
+            margin-bottom: 12px;
+        }
+        .team-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 0 12px rgba(0,0,0,0.4);
+        }
+        .tb-1 { background: linear-gradient(135deg, #b45309, #f59e0b); }
+        .tb-2 { background: linear-gradient(135deg, #0369a1, #38bdf8); }
+        .tb-3 { background: linear-gradient(135deg, #047857, #34d399); }
+        .tb-4 { background: linear-gradient(135deg, #6b21a8, #c084fc); }
+
+        .conn-status {
+            font-size: 12px;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .conn-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Riddle Card */
+        .riddle-card {
+            background: #131c2e;
+            border: 1.5px solid #2563eb;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .riddle-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .riddle-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        /* Truth Table */
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .table-wrap {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 14px;
+            direction: ltr;
+        }
+        th, td {
+            border: 1px solid #1e293b;
+            padding: 10px 4px;
+        }
+        th {
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .tt-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 15px;
+            width: 44px;
+            height: 34px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tt-btn.val-t {
+            background: #166534;
+            color: #bbf7d0;
+            border-color: #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+        .tt-btn.val-f {
+            background: #991b1b;
+            color: #fecaca;
+            border-color: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Formula Input Box */
+        .formula-display {
+            background: #050811;
+            border: 2px solid #38bdf8;
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 52px;
+            font-family: 'Consolas', monospace;
+            font-size: 22px;
+            font-weight: bold;
+            color: #38bdf8;
+            text-align: center;
+            direction: ltr;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.6);
+        }
+
+        /* Logic Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .key-btn {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-family: 'Consolas', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: background 0.1s, transform 0.05s;
+        }
+        .key-btn:active {
+            transform: scale(0.95);
+            background: #334155;
+        }
+        .key-sym {
+            color: #38bdf8;
+            font-size: 20px;
+        }
+        .key-var {
+            color: #f59e0b;
+        }
+        .key-act {
+            background: #334155;
+            font-size: 15px;
+            color: #94a3b8;
+        }
+
+        /* Launch Button */
+        .btn-launch {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.5);
+            margin-top: auto;
+            transition: transform 0.1s, box-shadow 0.15s;
+        }
+        .btn-launch:active {
+            transform: scale(0.97);
+        }
+
+        /* Status Toast */
+        .toast {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            display: none;
+        }
+        .toast-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #34d399;
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
+        /* Team Switcher Selector for testing */
+        .team-sel {
+            background: #0f172a;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <span class="team-badge" id="teamBadge">צוות 1</span>
+            <span style="font-size: 12px; color: #64748b; margin-right: 6px;">חט"ב עמי אסף</span>
+        </div>
+        <div class="conn-status">
+            <span class="conn-dot" id="connDot"></span>
+            <span id="connText">מחובר למכונה</span>
+        </div>
+    </div>
+
+    <!-- Riddle Story -->
+    <div class="riddle-card" id="riddleCard">
+        <div class="riddle-title" id="riddleTitle">📜 כתב החידה של התחנה</div>
+        <div class="riddle-text" id="riddleDesc">טוען חידה...</div>
+    </div>
+
+    <!-- Truth Table -->
+    <div class="section-label">שלב א': מלאו את טבלת האמת (לחצו להחלפה T/F)</div>
+    <div class="table-wrap">
+        <table id="truthTable">
+            <!-- Populated dynamically -->
+        </table>
+    </div>
+
+    <!-- Formula Display -->
+    <div class="section-label">שלב ב': הרכיבו את הפסוק הלוגי במקלדת</div>
+    <div class="formula-display" id="formulaDisp">_</div>
+
+    <!-- Keypad -->
+    <div class="keypad">
+        <button class="key-btn key-var" onclick="add('A')">A</button>
+        <button class="key-btn key-var" onclick="add('B')">B</button>
+        <button class="key-btn key-sym" onclick="add('¬')">¬</button>
+        <button class="key-btn key-sym" onclick="add('∧')">∧</button>
+        <button class="key-btn key-sym" onclick="add('∨')">∨</button>
+        <button class="key-btn key-sym" onclick="add('→')">→</button>
+        <button class="key-btn key-sym" onclick="add('≡')">≡</button>
+        <button class="key-btn key-sym" onclick="add('(')">(</button>
+        <button class="key-btn key-sym" onclick="add(')')">)</button>
+        <button class="key-btn key-act" onclick="del()">⌫</button>
+        <button class="key-btn key-act" style="grid-column: span 2;" onclick="clearF()">נקה הכל</button>
+    </div>
+
+    <!-- Launch Button -->
+    <button class="btn-launch" id="btnLaunch" onclick="submitToMachine()">
+        <span>🚀 שגר פתרון למכונה הראשית!</span>
+    </button>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Team change selector at bottom -->
+    <div style="margin-top: 14px; text-align: center; font-size: 11px; color: #475569;">
+        החלף צוות: 
+        <select class="team-sel" onchange="changeTeam(this.value)" id="teamSelect">
+            <option value="1">צוות 1: מנוע הקיטור (AND)</option>
+            <option value="2">צוות 2: שער הלייזר (IMPLIES)</option>
+            <option value="3">צוות 3: כור הפלזמה (דה מורגן 1)</option>
+            <option value="4">צוות 4: טורבינת העל (דה מורגן 2)</option>
+        </select>
+    </div>
+
+    <script>
+        // Parse team from URL: ?team=1..4
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentTeam = parseInt(urlParams.get('team')) || 1;
+        if (currentTeam < 1 || currentTeam > 4) currentTeam = 1;
+        document.getElementById('teamSelect').value = currentTeam;
+
+        // Team Definitions with Dotan's exact pedagogical riddles
+        const TEAMS = {
+            1: {
+                name: "צוות אלפא (קבוצה 1)",
+                cls: "tb-1",
+                border: "#f59e0b",
+                title: "⚙️ כתב חידה 1: כספת שני המפתחות",
+                desc: "מנוע הקיטור נעול בכספת כפולה הדורשת שני מפתחות בטיחות: שסתום A ושסתום B.<br><strong>הכלל:</strong> המנוע יופעל אך ורק כאשר שסתום A פתוח <u>וגם</u> שסתום B פתוח! אם אחד סגור – המכונה דוממת.<br>💡 <strong>משימה:</strong> מלאו את הטבלה וחווטו את שער ה-AND הנכון להפעלת המנוע.",
+                cols: ["A", "B", "A ∧ B", "A ∨ B"],
+                rows: [
+                    { a: "T", b: "T", correct: ["T", "T"] },
+                    { a: "T", b: "F", correct: ["F", "T"] },
+                    { a: "F", b: "T", correct: ["F", "T"] },
+                    { a: "F", b: "F", correct: ["F", "F"] }
+                ],
+                validFormulas: ["A∧B", "B∧A", "(A∧B)", "P=A∧B"]
+            },
+            2: {
+                name: "צוות בטא (קבוצה 2)",
+                cls: "tb-2",
+                border: "#0284c7",
+                title: "🎯 כתב חידה 2: חוזה החיישנים ומלכודת הגרירה",
+                desc: "על מסלול הכדור פועל חוזה אבטחה: <strong>'אם המחסום מורם (A), אז חיישן הלייזר יירה (B)'</strong> (A → B).<br>מתי מפרים את החוזה (שקר)? רק אם המחסום הורם אך הלייזר לא ירה!<br>אם המחסום לא הורם כלל (A=F) – החוזה לא הופר (אמת)!<br>💡 <strong>משימה:</strong> נסחו מחדש את החוזה באמצעות 'לא' ו-'או' (¬A ∨ B) כדי לירות את הלייזר לפריזמה.",
+                cols: ["A", "B", "A → B", "¬A ∨ B"],
+                rows: [
+                    { a: "T", b: "T", correct: ["T", "T"] },
+                    { a: "T", b: "F", correct: ["F", "F"] },
+                    { a: "F", b: "T", correct: ["T", "T"] },
+                    { a: "F", b: "F", correct: ["T", "T"] }
+                ],
+                validFormulas: ["A→B", "¬A∨B", "(¬A)∨B", "A→B≡¬A∨B"]
+            },
+            3: {
+                name: "צוות גמא (קבוצה 3)",
+                cls: "tb-3",
+                border: "#10b981",
+                title: "🧪 כתב חידה 3: כור החומרים המסוכנים (דה-מורגן 1)",
+                desc: "אזעקת חירום! בכור הפלזמה יש נתרן (A) ומים (B). כלל הבטיחות העליון קובע: <strong>אסור בשום אופן שגם נתרן וגם מים יהיו יחד!</strong> כלומר: ¬(A ∧ B).<br>כיצד ננסח זאת בעזרת 'או'? כדי שלא יהיו שניהם, מספיק ש... <strong>או שאין נתרן, או שאין מים!</strong><br>💡 <strong>משימה:</strong> הוכיחו בטבלה והזינו את חוק דה-מורגן הראשון כדי לייצב את הפלזמה.",
+                cols: ["A", "B", "A ∧ B", "¬(A ∧ B)", "¬A ∨ ¬B"],
+                rows: [
+                    { a: "T", b: "T", correct: ["T", "F", "F"] },
+                    { a: "T", b: "F", correct: ["F", "T", "T"] },
+                    { a: "F", b: "T", correct: ["F", "T", "T"] },
+                    { a: "F", b: "F", correct: ["F", "T", "T"] }
+                ],
+                validFormulas: ["¬(A∧B)≡¬A∨¬B", "¬(A∧B)", "¬A∨¬B", "(¬A)∨(¬B)"]
+            },
+            4: {
+                name: "צוות דלתא (קבוצה 4)",
+                cls: "tb-4",
+                border: "#a855f7",
+                title: "🌀 כתב חידה 4: נעילת הטורבינה וההמראה (דה-מורגן 2)",
+                desc: "הטורבינה מוכנה אך נעולה על ידי שני בלמי חירום (A ו-B). מפקד הטיסה מכריז: <strong>הטורבינה לא תמריא אם בלם A מופעל או בלם B מופעל!</strong> כלומר: ¬(A ∨ B).<br>מה חייב להתקיים כדי להמריא? חייב ש... <strong>גם בלם A לא יפעל וגם בלם B לא יפעל!</strong><br>💡 <strong>משימה:</strong> הוכיחו בטבלה והזינו את חוק דה-מורגן השני כדי לשחרר את הבלמים.",
+                cols: ["A", "B", "A ∨ B", "¬(A ∨ B)", "¬A ∧ ¬B"],
+                rows: [
+                    { a: "T", b: "T", correct: ["T", "F", "F"] },
+                    { a: "T", b: "F", correct: ["T", "F", "F"] },
+                    { a: "F", b: "T", correct: ["T", "F", "F"] },
+                    { a: "F", b: "F", correct: ["F", "T", "T"] }
+                ],
+                validFormulas: ["¬(A∨B)≡¬A∧¬B", "¬(A∨B)", "¬A∧¬B", "(¬A)∧(¬B)"]
+            }
+        };
+
+        // Current state for team
+        let userTable = [];
+        let formula = "";
+
+        function initTeamUI() {
+            const t = TEAMS[currentTeam];
+            const badge = document.getElementById('teamBadge');
+            badge.innerText = t.name;
+            badge.className = "team-badge " + t.cls;
+
+            const card = document.getElementById('riddleCard');
+            card.style.borderColor = t.border;
+            document.getElementById('riddleTitle').innerHTML = t.title;
+            document.getElementById('riddleTitle').style.color = t.border;
+            document.getElementById('riddleDesc').innerHTML = t.desc;
+
+            // Render Table
+            userTable = t.rows.map(r => r.correct.map(() => null));
+            renderTable();
+
+            // Clear formula
+            formula = "";
+            updateFormulaDisp();
+            hideToast();
+        }
+
+        function renderTable() {
+            const t = TEAMS[currentTeam];
+            let html = "<thead><tr>";
+            t.cols.forEach(c => html += `<th>${c}</th>`);
+            html += "</tr></thead><tbody>";
+
+            t.rows.forEach((r, rIdx) => {
+                html += `<tr><td><strong>${r.a}</strong></td><td><strong>${r.b}</strong></td>`;
+                userTable[rIdx].forEach((val, cIdx) => {
+                    const cls = val === "T" ? "val-t" : (val === "F" ? "val-f" : "");
+                    const lbl = val || "?";
+                    html += `<td><button class="tt-btn ${cls}" onclick="toggleCell(${rIdx}, ${cIdx})">${lbl}</button></td>`;
+                });
+                html += "</tr>";
+            });
+            html += "</tbody>";
+            document.getElementById('truthTable').innerHTML = html;
+        }
+
+        function toggleCell(rIdx, cIdx) {
+            playAudioTick();
+            let curr = userTable[rIdx][cIdx];
+            if (!curr) userTable[rIdx][cIdx] = "T";
+            else if (curr === "T") userTable[rIdx][cIdx] = "F";
+            else userTable[rIdx][cIdx] = null;
+            renderTable();
+        }
+
+        // Keypad actions
+        function add(sym) {
+            playAudioTick();
+            formula += sym;
+            updateFormulaDisp();
+        }
+        function del() {
+            playAudioTick();
+            formula = formula.slice(0, -1);
+            updateFormulaDisp();
+        }
+        function clearF() {
+            playAudioTick();
+            formula = "";
+            updateFormulaDisp();
+        }
+        function updateFormulaDisp() {
+            document.getElementById('formulaDisp').innerText = formula || "_";
+        }
+
+        function changeTeam(val) {
+            currentTeam = parseInt(val);
+            initTeamUI();
+        }
+
+        // Realtime MQTT client over WebSocket
+        const ROOM = "ami-asaf-logic-2026";
+        let mqttClient = null;
+
+        function connectMQTT() {
+            try {
+                mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
+                    clientId: 'ami_mobile_' + Math.random().toString(16).substr(2, 8),
+                    keepalive: 60
+                });
+
+                mqttClient.on('connect', () => {
+                    document.getElementById('connDot').style.background = "#10b981";
+                    document.getElementById('connDot').style.boxShadow = "0 0 8px #10b981";
+                    document.getElementById('connText').innerText = "מחובר למכונה";
+                });
+
+                mqttClient.on('error', () => {
+                    document.getElementById('connDot').style.background = "#f59e0b";
+                    document.getElementById('connText').innerText = "חיבור מקומי";
+                });
+            } catch(e) {
+                console.log("MQTT offline mode", e);
+            }
+        }
+
+        // Web Audio Synthesizer
+        let audioCtx = null;
+        function playAudioTick() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e){}
+        }
+
+        function playSuccessSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime + i * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + i * 0.1);
+                    osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+                });
+            } catch(e){}
+        }
+
+        function playErrorSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch(e){}
+        }
+
+        function showToast(msg, isSuccess) {
+            const toast = document.getElementById('toast');
+            toast.className = "toast " + (isSuccess ? "toast-success" : "toast-error");
+            toast.innerHTML = msg;
+            toast.style.display = "block";
+        }
+        function hideToast() {
+            document.getElementById('toast').style.display = "none";
+        }
+
+        // Submit logic
+        function submitToMachine() {
+            const t = TEAMS[currentTeam];
+            
+            // Check table
+            let tableComplete = true;
+            let tableCorrect = true;
+            t.rows.forEach((r, rIdx) => {
+                userTable[rIdx].forEach((val, cIdx) => {
+                    if (!val) tableComplete = false;
+                    if (val !== r.correct[cIdx]) tableCorrect = false;
+                });
+            });
+
+            if (!tableComplete) {
+                playErrorSound();
+                showToast("⚠️ טבלת האמת לא מלאה! השלימו את כל המשבצות.", false);
+                return;
+            }
+            if (!tableCorrect) {
+                playErrorSound();
+                showToast("❌ יש טעות בטבלת האמת! בדקו שוב את שורות הטבלה.", false);
+                return;
+            }
+
+            // Check formula
+            const clean = formula.replace(/\s+/g, '');
+            let formulaOk = false;
+            for (let v of t.validFormulas) {
+                if (clean.includes(v.replace(/\s+/g, ''))) {
+                    formulaOk = true;
+                    break;
+                }
+            }
+
+            if (!formulaOk) {
+                playErrorSound();
+                showToast("❌ הפסוק הלוגי אינו תואם לחידה! היעזרו ברמז בכתב החידה.", false);
+                return;
+            }
+
+            // ALL CORRECT!
+            playSuccessSound();
+            showToast("🎉 מצוין! התחנה שוחררה בהצלחה ושודרה למקרן!", true);
+
+            // Transmit via MQTT
+            const payload = JSON.stringify({
+                team: currentTeam,
+                formula: formula,
+                timestamp: Date.now()
+            });
+
+            if (mqttClient && mqttClient.connected) {
+                mqttClient.publish(`${ROOM}/unlock`, payload);
+            }
+
+            // Also save to localStorage for local testing on same machine
+            localStorage.setItem(`ami_unlocked_team_${currentTeam}`, JSON.stringify({
+                formula: formula,
+                time: Date.now()
+            }));
+        }
+
+        // Startup
+        initTeamUI();
+        connectMQTT();
+    </script>
+</body>
+</html>
