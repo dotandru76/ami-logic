@@ -306,6 +306,7 @@
             color: #38bdf8;
             direction: ltr;
             unicode-bidi: isolate;
+            display: inline-block;
         }
 
         /* Riddle Description */
@@ -335,6 +336,7 @@
             border-collapse: collapse;
             text-align: center;
             font-size: 13px;
+            direction: ltr;
         }
         .truth-table th {
             background: #0f172a;
@@ -343,10 +345,13 @@
             border-bottom: 2px solid #1e293b;
             font-family: 'Consolas', monospace;
             direction: ltr;
+            unicode-bidi: isolate;
         }
         .truth-table td {
             padding: 8px 4px;
             border-bottom: 1px solid #1e293b;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
         .input-cell {
             background: #1e293b;
@@ -363,6 +368,8 @@
             cursor: pointer;
             user-select: none;
             transition: all 0.15s;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
         .input-cell.val-T {
             background: rgba(16, 185, 129, 0.25);
@@ -386,6 +393,7 @@
             justify-content: space-between;
             min-height: 52px;
             box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+            direction: ltr;
         }
         .formula-text {
             font-family: 'Consolas', monospace;
@@ -402,6 +410,7 @@
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 6px;
+            direction: ltr;
         }
         @media (min-width: 520px) {
             .keypad-grid {
@@ -673,8 +682,8 @@
         const STATIONS = {
             1: {
                 title: "⚙️ תחנה 1: מנוע הקיטור – מלכודת הכשל והאזעקה",
-                desc: "<strong>התקלה במנוע:</strong> תקן הבטיחות מבטיח: <em>'אם המבער פועל (A) אז שסתום הקיטור פתוח (B)'</em> (A → B).<br>" +
-                      "מערכת אזעקת החירום חייבת להידרך <strong>אך ורק כאשר התקן מופר (מצב כשל מסוכן)!</strong> כלומר: ¬(A → B).<br>" +
+                desc: "<strong>התקלה במנוע:</strong> תקן הבטיחות מבטיח: <em>'אם המבער פועל (A) אז שסתום הקיטור פתוח (B)'</em> (<span class='math-code'>A → B</span>)&lrm;.<br>" +
+                      "מערכת אזעקת החירום חייבת להידרך <strong>אך ורק כאשר התקן מופר (מצב כשל מסוכן)!</strong> כלומר: <span class='math-code'>¬(A → B)</span>&lrm;.<br>" +
                       "💡 <strong>משימת השולחן:</strong> השלימו את טבלת האמת וגלו את הפסוק המפושט המינימלי שמגדיר מתי מתרחש הכשל (רמז: מתי יש אש אך אין קיטור?).",
                 cols: ["A", "B", "A → B", "¬(A → B)", "A ∧ ¬B"],
                 rows: [
@@ -689,8 +698,8 @@
             },
             2: {
                 title: "🎯 תחנה 2: שער הלייזר – מעגל הגיבוי החלופי",
-                desc: "<strong>התקלה במעבד:</strong> שער הלייזר פועל בגרירה: <em>'אם השער מורם (A) אז הלייזר יורה (B)'</em> (A → B).<br>" +
-                      "מעבד הלייזר נשרף, ומעגל הגיבוי מסוגל לפעול אך ורק באמצעות <strong>שערי 'לא' (¬) ו-'או' (∨)</strong>, ללא שער גרירה!<br>" +
+                desc: "<strong>התקלה במעבד:</strong> שער הלייזר פועל בגרירה: <em>'אם השער מורם (A) אז הלייזר יורה (B)'</em> (<span class='math-code'>A → B</span>)&lrm;.<br>" +
+                      "מעבד הלייזר נשרף, ומעגל הגיבוי מסוגל לפעול אך ורק באמצעות שערי <strong>'לא' (<span class='math-code'>¬</span>) ו-'או' (<span class='math-code'>∨</span>)&lrm;</strong>, ללא שער גרירה!<br>" +
                       "💡 <strong>משימת השולחן:</strong> היעזרו בנוסחאון הבסיס, השלימו את הטבלה ומצאו את הפסוק השקול שיחליף את המעבד השרוף.",
                 cols: ["A", "B", "¬A", "A → B", "¬A ∨ B"],
                 rows: [
@@ -705,8 +714,8 @@
             },
             3: {
                 title: "🧪 תחנה 3: כור הפלזמה – בידוד נתרן ומים (דה-מורגן 1)",
-                desc: "<strong>אזעקת חירום בכור:</strong> במיכל יש נתרן (A) ומים (B). כלל הבטיחות העליון קובע: <strong>אסור בשום אופן שגם נתרן וגם מים ייכנסו יחד!</strong> כלומר: ¬(A ∧ B).<br>" +
-                      "מחשב הבטיחות דורש פקודת שסתומים מקבילית המוגדרת באמצעות שער <strong>'או' (∨)</strong> של השלילות בנפרד.<br>" +
+                desc: "<strong>אזעקת חירום בכור:</strong> במיכל יש נתרן (A) ומים (B). כלל הבטיחות העליון קובע: <strong>אסור בשום אופן שגם נתרן וגם מים ייכנסו יחד!</strong> כלומר: <span class='math-code'>¬(A ∧ B)</span>&lrm;.<br>" +
+                      "מחשב הבטיחות דורש פקודת שסתומים מקבילית המוגדרת באמצעות שער <strong>'או' (<span class='math-code'>∨</span>)&lrm;</strong> של השלילות בנפרד.<br>" +
                       "💡 <strong>משימת השולחן:</strong> היעזרו בחוק דה-מורגן 1, השלימו את הטבלה והזינו את פקודת השסתומים המפושטת.",
                 cols: ["A", "B", "A ∧ B", "¬(A ∧ B)", "¬A ∨ ¬B"],
                 rows: [
@@ -721,8 +730,8 @@
             },
             4: {
                 title: "🌀 תחנה 4: טורבינת העל – שחרור בלמים כפול (דה-מורגן 2)",
-                desc: "<strong>נעילת חירום בחללית:</strong> הטורבינה נעולה על ידי שני בלמים מגנטיים (A ו-B). מפקד הטיסה מתריע: <strong>הטורבינה לא תמריא אם בלם A מופעל או בלם B מופעל!</strong> כלומר: ¬(A ∨ B).<br>" +
-                      "מערכת ההמראה דורשת פקודת שחרור ישירה המגדירה מה הסטטוס הנדרש מכל בלם בנפרד באמצעות קשר <strong>'וגם' (∧)</strong>.<br>" +
+                desc: "<strong>נעילת חירום בחללית:</strong> הטורבינה נעולה על ידי שני בלמים מגנטיים (A ו-B). מפקד הטיסה מתריע: <strong>הטורבינה לא תמריא אם בלם A מופעל או בלם B מופעל!</strong> כלומר: <span class='math-code'>¬(A ∨ B)</span>&lrm;.<br>" +
+                      "מערכת ההמראה דורשת פקודת שחרור ישירה המגדירה מה הסטטוס הנדרש מכל בלם בנפרד באמצעות קשר <strong>'וגם' (<span class='math-code'>∧</span>)&lrm;</strong>.<br>" +
                       "💡 <strong>משימת השולחן:</strong> היעזרו בחוק דה-מורגן 2, השלימו את הטבלה והזינו את פקודת השחרור המפושטת להמראה.",
                 cols: ["A", "B", "A ∨ B", "¬(A ∨ B)", "¬A ∧ ¬B"],
                 rows: [
