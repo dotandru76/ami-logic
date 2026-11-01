@@ -2,54 +2,69 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>שלט קבוצתי • המכונה הלוגית המופלאה</title>
-    <!-- MQTT.js CDN for live communication -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>שלט שולחן חכם • המכונה הלוגית המופלאה • עמי אסף</title>
+    <!-- MQTT.js CDN -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #090d16;
+            background: #030712;
             color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            direction: rtl;
-            padding: 14px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #1e293b;
-            margin-bottom: 12px;
+            padding: 12px;
+            overflow-x: hidden;
         }
-        .team-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 14px;
-            color: white;
-            box-shadow: 0 0 12px rgba(0,0,0,0.4);
-        }
-        .tb-1 { background: linear-gradient(135deg, #b45309, #f59e0b); }
-        .tb-2 { background: linear-gradient(135deg, #0369a1, #38bdf8); }
-        .tb-3 { background: linear-gradient(135deg, #047857, #34d399); }
-        .tb-4 { background: linear-gradient(135deg, #6b21a8, #c084fc); }
 
-        .conn-status {
-            font-size: 12px;
-            color: #10b981;
+        .container {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Header Bar */
+        .app-header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .app-title {
+            font-size: 15px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .conn-badge {
             display: flex;
             align-items: center;
             gap: 6px;
+            font-size: 11px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-weight: bold;
         }
         .conn-dot {
             width: 8px;
@@ -59,312 +74,640 @@
             box-shadow: 0 0 8px #10b981;
         }
 
-        /* Riddle Card */
-        .riddle-card {
-            background: #131c2e;
-            border: 1.5px solid #2563eb;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        /* Card Base */
+        .card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
         }
-        .riddle-title {
-            font-size: 16px;
+
+        /* ============================================================ */
+        /* STAGE 1: CHECK-IN & NAME SELECTION                           */
+        /* ============================================================ */
+        #checkin-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .checkin-title {
+            font-size: 18px;
             font-weight: 800;
+            color: #f1f5f9;
+            text-align: center;
+        }
+        .checkin-subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: -6px;
+        }
+        .selected-chips-box {
+            background: #090d16;
+            border: 1px dashed #334155;
+            border-radius: 12px;
+            padding: 10px;
+            min-height: 48px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .chip {
+            background: rgba(56, 189, 248, 0.15);
             color: #38bdf8;
-            margin-bottom: 8px;
+            border: 1px solid #0284c7;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
         }
-        .riddle-text {
+        .chip-remove {
+            cursor: pointer;
             font-size: 14px;
-            line-height: 1.6;
-            color: #cbd5e1;
+            color: #94a3b8;
+        }
+        .chip-placeholder {
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
         }
 
-        /* Truth Table */
-        .section-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: #94a3b8;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-        .table-wrap {
-            background: #0f172a;
+        /* Search & Roster Grid */
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #090d16;
             border: 1px solid #334155;
             border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
+            color: #f8fafc;
             font-size: 14px;
-            direction: ltr;
+            outline: none;
+            direction: rtl;
         }
-        th, td {
+        .search-input:focus {
+            border-color: #38bdf8;
+        }
+        .roster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 4px;
+            background: #050811;
+            border-radius: 12px;
             border: 1px solid #1e293b;
-            padding: 10px 4px;
         }
-        th {
-            background: #1e293b;
-            color: #94a3b8;
+        .student-item {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 8px 10px;
             font-size: 12px;
-            font-weight: 700;
-        }
-        .tt-btn {
-            background: #1e293b;
-            color: #cbd5e1;
-            border: 1px solid #475569;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 15px;
-            width: 44px;
-            height: 34px;
             cursor: pointer;
+            text-align: center;
             transition: all 0.15s;
+            user-select: none;
         }
-        .tt-btn.val-t {
-            background: #166534;
-            color: #bbf7d0;
-            border-color: #22c55e;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-        }
-        .tt-btn.val-f {
-            background: #991b1b;
-            color: #fecaca;
-            border-color: #ef4444;
-            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        .student-item.selected {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #6ee7b7;
+            font-weight: bold;
         }
 
-        /* Formula Input Box */
-        .formula-display {
-            background: #050811;
-            border: 2px solid #38bdf8;
-            border-radius: 10px;
-            padding: 12px;
-            min-height: 52px;
-            font-family: 'Consolas', monospace;
-            font-size: 22px;
-            font-weight: bold;
-            color: #38bdf8;
-            text-align: center;
-            direction: ltr;
-            letter-spacing: 2px;
+        .btn-spin {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.6);
+            gap: 8px;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-spin:active {
+            transform: scale(0.98);
+        }
+        .btn-spin:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(1);
         }
 
-        /* Logic Keypad */
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+        /* ============================================================ */
+        /* STAGE 2: LOTTERY SPIN OVERLAY                                */
+        /* ============================================================ */
+        #spin-overlay {
+            display: none;
+            text-align: center;
+            padding: 30px 10px;
+        }
+        .spin-wheel {
+            font-size: 48px;
+            animation: spinAnim 0.6s infinite ease-in-out;
+            margin-bottom: 15px;
+        }
+        @keyframes spinAnim {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        .spin-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        /* ============================================================ */
+        /* STAGE 3: MISSION WORKSPACE (TABLET & MOBILE)                 */
+        /* ============================================================ */
+        #mission-screen {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Table & Station Title Card */
+        .table-banner {
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 800;
+        }
+        .table-badge-tag {
+            font-size: 15px;
+            display: flex;
+            align-items: center;
             gap: 8px;
-            margin-bottom: 14px;
+        }
+        .table-members-summary {
+            font-size: 11px;
+            color: #cbd5e1;
+            font-weight: normal;
+        }
+
+        /* Engineer's Toolbox Card (Reference formulas) */
+        .toolbox-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #f59e0b;
+            border-radius: 14px;
+            padding: 12px 14px;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+        }
+        .toolbox-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+        .toolbox-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            font-size: 12px;
+        }
+        @media (min-width: 520px) {
+            .toolbox-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .tb-item {
+            background: #090d16;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            direction: rtl;
+        }
+        .math-code {
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            color: #38bdf8;
+            direction: ltr;
+            unicode-bidi: isolate;
+        }
+
+        /* Riddle Description */
+        .riddle-card {
+            border-left: 4px solid #38bdf8;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            background: rgba(8, 47, 73, 0.25);
+            border-radius: 10px;
+        }
+        .riddle-card strong {
+            color: #f8fafc;
+        }
+
+        /* Truth Table */
+        .truth-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            background: #050811;
+        }
+        .truth-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+        .truth-table th {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 10px 6px;
+            border-bottom: 2px solid #1e293b;
+            font-family: 'Consolas', monospace;
+            direction: ltr;
+        }
+        .truth-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .input-cell {
+            background: #1e293b;
+            border: 1.5px dashed #475569;
+            color: #94a3b8;
+            font-weight: bold;
+            font-size: 16px;
+            width: 44px;
+            height: 38px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+        }
+        .input-cell.val-T {
+            background: rgba(16, 185, 129, 0.25);
+            border: 2px solid #10b981;
+            color: #34d399;
+        }
+        .input-cell.val-F {
+            background: rgba(239, 68, 68, 0.25);
+            border: 2px solid #ef4444;
+            color: #f87171;
+        }
+
+        /* Formula Input Box */
+        .formula-display-card {
+            background: #050811;
+            border: 2px solid #4f46e5;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 52px;
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+        }
+        .formula-text {
+            font-family: 'Consolas', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #a5b4fc;
+            direction: ltr;
+            unicode-bidi: isolate;
+        }
+
+        /* Virtual Keypad (Optimized for iPad & Phone Touch) */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+        @media (min-width: 520px) {
+            .keypad-grid {
+                gap: 10px;
+            }
         }
         .key-btn {
             background: #1e293b;
             color: #f8fafc;
             border: 1px solid #334155;
-            border-radius: 8px;
-            font-family: 'Consolas', sans-serif;
-            font-weight: 800;
-            font-size: 18px;
+            border-radius: 10px;
             height: 48px;
-            cursor: pointer;
+            font-size: 18px;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             transition: background 0.1s, transform 0.05s;
         }
         .key-btn:active {
             transform: scale(0.95);
             background: #334155;
         }
-        .key-sym {
-            color: #38bdf8;
-            font-size: 20px;
-        }
-        .key-var {
-            color: #f59e0b;
-        }
-        .key-act {
+        .key-btn.action {
             background: #334155;
-            font-size: 15px;
-            color: #94a3b8;
+            color: #fbbf24;
+            font-size: 14px;
         }
 
-        /* Launch Button */
-        .btn-launch {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        /* Main Submit Button */
+        .btn-submit {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
-            border-radius: 12px;
             padding: 16px;
-            font-size: 18px;
-            font-weight: 900;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 800;
             cursor: pointer;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.5);
-            margin-top: auto;
-            transition: transform 0.1s, box-shadow 0.15s;
+            gap: 8px;
+            transition: transform 0.1s;
         }
-        .btn-launch:active {
-            transform: scale(0.97);
+        .btn-submit:active {
+            transform: scale(0.98);
         }
 
-        /* Status Toast */
+        /* Feedback Toast */
         .toast {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
             display: none;
-        }
-        .toast-success {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid #10b981;
-            color: #34d399;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            animation: fadeIn 0.3s;
         }
         .toast-error {
             background: rgba(239, 68, 68, 0.2);
             border: 1px solid #ef4444;
             color: #fca5a5;
         }
-
-        /* Team Switcher Selector for testing */
-        .team-sel {
-            background: #0f172a;
-            color: #94a3b8;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 12px;
+        .toast-success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <span class="team-badge" id="teamBadge">צוות 1</span>
-            <span style="font-size: 12px; color: #64748b; margin-right: 6px;">חט"ב עמי אסף</span>
-        </div>
-        <div class="conn-status">
-            <span class="conn-dot" id="connDot"></span>
-            <span id="connText">מחובר למכונה</span>
-        </div>
+    <div class="container">
+
+        <!-- App Top Bar -->
+        <header class="app-header">
+            <span class="app-title">⚡ המכונה הלוגית המופלאה • עמי אסף</span>
+            <div class="conn-badge">
+                <span class="conn-dot" id="connDot"></span>
+                <span id="connText">מחובר למקרן</span>
+            </div>
+        </header>
+
+        <!-- ============================================================ -->
+        <!-- STAGE 1: CHECK-IN & ROSTER PICKER                            -->
+        <!-- ============================================================ -->
+        <section class="card" id="checkin-screen">
+            <h2 class="checkin-title">👥 הרכבת צוות שולחן העבודה</h2>
+            <p class="checkin-subtitle">סמנו את 3 עד 5 התלמידים היושבים בשולחן שלכם:</p>
+
+            <!-- Selected Chips Display -->
+            <div class="selected-chips-box" id="selectedBox">
+                <span class="chip-placeholder" id="chipPlaceholder">טרם נבחרו תלמידים (סמנו מהרשימה למטה)</span>
+            </div>
+
+            <!-- Instant Search Filter -->
+            <input type="text" class="search-input" id="searchRoster" placeholder="🔍 חפשו שם תלמיד/ה..." oninput="filterRoster()">
+
+            <!-- Scrollable 34 Students Grid -->
+            <div class="roster-grid" id="rosterGrid"></div>
+
+            <!-- Lottery Spin Button -->
+            <button class="btn-spin" id="btnSpin" onclick="startSlotLottery()" disabled>
+                <span>🎲 הגרל אתגר לשולחן והתחבר למכונה!</span>
+            </button>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- STAGE 2: LOTTERY SPIN REVEAL                                 -->
+        <!-- ============================================================ -->
+        <section class="card" id="spin-overlay">
+            <div class="spin-wheel">🎰</div>
+            <div class="spin-text" id="spinText">מגריל אתגר ושולחן עבודה...</div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- STAGE 3: ACTIVE MISSION WORKSPACE                            -->
+        <!-- ============================================================ -->
+        <main id="mission-screen">
+            
+            <!-- Table Assignment Banner -->
+            <div class="table-banner card" id="tableBanner">
+                <div class="table-badge-tag" id="tableTag">🎯 שולחן 1א'</div>
+                <div class="table-members-summary" id="membersSummary">חברי השולחן: רונה, גיא, תמר</div>
+            </div>
+
+            <!-- Engineer's Base Formula Reference Card -->
+            <div class="toolbox-card">
+                <div class="toolbox-header">
+                    <span>🛠️ נוסחאון בסיס: חוקי דה-מורגן ושקילויות יסוד</span>
+                </div>
+                <div class="toolbox-grid">
+                    <div class="tb-item"><span>דה-מורגן 1 (שלילת וגם):</span> <span class="math-code">¬(A ∧ B) ≡ ¬A ∨ ¬B</span></div>
+                    <div class="tb-item"><span>דה-מורגן 2 (שלילת או):</span> <span class="math-code">¬(A ∨ B) ≡ ¬A ∧ ¬B</span></div>
+                    <div class="tb-item"><span>שקילות התנאי (גרירה כ"או"):</span> <span class="math-code">A → B ≡ ¬A ∨ B</span></div>
+                    <div class="tb-item"><span>שלילת תנאי (הפרת חוזה):</span> <span class="math-code">¬(A → B) ≡ A ∧ ¬B</span></div>
+                </div>
+            </div>
+
+            <!-- Riddle Story Card (Without spoiled answers!) -->
+            <div class="card riddle-card" id="riddleCard">
+                <strong id="riddleTitle">כתב החידה</strong><br>
+                <span id="riddleDesc">תיאור החידה</span>
+            </div>
+
+            <!-- Interactive 5-Column Truth Table -->
+            <div class="card" style="padding: 10px;">
+                <div style="font-size: 13px; font-weight: 800; margin-bottom: 8px; color: #cbd5e1;">
+                    שלב א': השלימו את טבלת האמת (לחצו על המשבצות להחלפת ערך):
+                </div>
+                <div class="truth-table-wrap">
+                    <table class="truth-table" id="truthTable">
+                        <thead><tr id="tableHead"></tr></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Logic Formula Keypad & Display -->
+            <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 13px; font-weight: 800; color: #cbd5e1;">
+                    שלב ב': הרכיבו את הפסוק המפושט המינימלי וקשרו למכונה:
+                </div>
+
+                <div class="formula-display-card">
+                    <span class="formula-text" id="formulaDisp">_</span>
+                    <button class="key-btn action" style="width: 50px; height: 36px; padding: 0;" onclick="clearFormula()">נקה</button>
+                </div>
+
+                <!-- Touch Logic Keypad -->
+                <div class="keypad-grid">
+                    <button class="key-btn" onclick="addSym('A')">A</button>
+                    <button class="key-btn" onclick="addSym('B')">B</button>
+                    <button class="key-btn" onclick="addSym('¬')" style="color: #38bdf8;">¬</button>
+                    <button class="key-btn" onclick="addSym('∧')" style="color: #fbbf24;">∧</button>
+                    <button class="key-btn" onclick="addSym('∨')" style="color: #34d399;">∨</button>
+                    <button class="key-btn" onclick="addSym('→')" style="color: #f472b6;">→</button>
+                    <button class="key-btn" onclick="addSym('(')">(</button>
+                    <button class="key-btn" onclick="addSym(')')">)</button>
+                    <button class="key-btn" onclick="addSym('≡')" style="color: #c084fc;">≡</button>
+                    <button class="key-btn" onclick="addSym(' ')" style="font-size: 12px;">רווח</button>
+                    <button class="key-btn action" onclick="backspaceFormula()" style="grid-column: span 2;">⌫ מחק</button>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="btn-submit" onclick="submitSolution()">
+                    <span>🚀 שגר פתרון למכונה על המקרן!</span>
+                </button>
+
+                <!-- Feedback Toast -->
+                <div class="toast" id="toast"></div>
+            </div>
+
+        </main>
+
     </div>
 
-    <!-- Riddle Story -->
-    <div class="riddle-card" id="riddleCard">
-        <div class="riddle-title" id="riddleTitle">📜 כתב החידה של התחנה</div>
-        <div class="riddle-text" id="riddleDesc">טוען חידה...</div>
-    </div>
-
-    <!-- Truth Table -->
-    <div class="section-label">שלב א': מלאו את טבלת האמת (לחצו להחלפה T/F)</div>
-    <div class="table-wrap">
-        <table id="truthTable">
-            <!-- Populated dynamically -->
-        </table>
-    </div>
-
-    <!-- Formula Display -->
-    <div class="section-label">שלב ב': הרכיבו את הפסוק הלוגי במקלדת</div>
-    <div class="formula-display" id="formulaDisp">_</div>
-
-    <!-- Keypad -->
-    <div class="keypad">
-        <button class="key-btn key-var" onclick="add('A')">A</button>
-        <button class="key-btn key-var" onclick="add('B')">B</button>
-        <button class="key-btn key-sym" onclick="add('¬')">¬</button>
-        <button class="key-btn key-sym" onclick="add('∧')">∧</button>
-        <button class="key-btn key-sym" onclick="add('∨')">∨</button>
-        <button class="key-btn key-sym" onclick="add('→')">→</button>
-        <button class="key-btn key-sym" onclick="add('≡')">≡</button>
-        <button class="key-btn key-sym" onclick="add('(')">(</button>
-        <button class="key-btn key-sym" onclick="add(')')">)</button>
-        <button class="key-btn key-act" onclick="del()">⌫</button>
-        <button class="key-btn key-act" style="grid-column: span 2;" onclick="clearF()">נקה הכל</button>
-    </div>
-
-    <!-- Launch Button -->
-    <button class="btn-launch" id="btnLaunch" onclick="submitToMachine()">
-        <span>🚀 שגר פתרון למכונה הראשית!</span>
-    </button>
-
-    <div class="toast" id="toast"></div>
-
-    <!-- Team change selector at bottom -->
-    <div style="margin-top: 14px; text-align: center; font-size: 11px; color: #475569;">
-        החלף צוות: 
-        <select class="team-sel" onchange="changeTeam(this.value)" id="teamSelect">
-            <option value="1">צוות 1: מנוע הקיטור (AND)</option>
-            <option value="2">צוות 2: שער הלייזר (IMPLIES)</option>
-            <option value="3">צוות 3: כור הפלזמה (דה מורגן 1)</option>
-            <option value="4">צוות 4: טורבינת העל (דה מורגן 2)</option>
-        </select>
-    </div>
-
+    <!-- AUDIO ENGINE -->
     <script>
-        // Parse team from URL: ?team=1..4
-        const urlParams = new URLSearchParams(window.location.search);
-        let currentTeam = parseInt(urlParams.get('team')) || 1;
-        if (currentTeam < 1 || currentTeam > 4) currentTeam = 1;
-        document.getElementById('teamSelect').value = currentTeam;
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        function playTick() {
+            try {
+                initAudio();
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.frequency.value = 800;
+                g.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.04);
+            }catch(e){}
+        }
+        function playChime() {
+            try {
+                initAudio();
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.frequency.value = freq;
+                    g.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.1);
+                    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.4);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(audioCtx.currentTime + i * 0.1);
+                    o.stop(audioCtx.currentTime + i * 0.1 + 0.45);
+                });
+            }catch(e){}
+        }
+        function playErrorSound() {
+            try {
+                initAudio();
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.type = 'sawtooth';
+                o.frequency.value = 180;
+                g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.25);
+            }catch(e){}
+        }
+    </script>
 
-        // Team Definitions with Dotan's exact pedagogical riddles
-        const TEAMS = {
+    <!-- CORE DATA & LOGIC ENGINE -->
+    <script>
+        // 34 Students Roster for ח'1 מדעית
+        const STUDENTS = [
+            "אמיתי רונה", "אפל גיא", "בן ציון אריאל", "בנימין תמר", "ברקוביץ רון",
+            "המבורגר עידו", "וינברג עפרי", "זבידה אהוד", "זוהר טל", "חאסקיה ראלי",
+            "יעקבי גילי", "ירום עמית", "ירום רוני", "ליבני אליה", "למברג רועי",
+            "למפרט עמית", "מזור מתן אברהם", "מן יואב", "סטרשנוב עומרי", "סכול עומר",
+            "עזרא דניאל", "פאר איל", "פז אלון", "פז רוני", "פרקש איתי",
+            "צ'יפיגה אלכסנדר", "קאגו אליה", "קורן נעה פלג", "רוזנבוים אלה", "רון עידו",
+            "רותם טום", "ריבק אסף", "רן רוזנבאום ארי", "שריקי דניאלה"
+        ];
+
+        // 4 Advanced Mathematical Station Definitions (Slots 1a..4b)
+        const STATIONS = {
             1: {
-                name: "צוות אלפא (קבוצה 1)",
-                cls: "tb-1",
-                border: "#f59e0b",
-                title: "⚙️ כתב חידה 1: כספת שני המפתחות",
-                desc: "מנוע הקיטור נעול בכספת כפולה הדורשת שני מפתחות בטיחות: שסתום A ושסתום B.<br><strong>הכלל:</strong> המנוע יופעל אך ורק כאשר שסתום A פתוח <u>וגם</u> שסתום B פתוח! אם אחד סגור – המכונה דוממת.<br>💡 <strong>משימה:</strong> מלאו את הטבלה וחווטו את שער ה-AND הנכון להפעלת המנוע.",
-                cols: ["A", "B", "A ∧ B", "A ∨ B"],
+                title: "⚙️ תחנה 1: מנוע הקיטור – מלכודת הכשל והאזעקה",
+                desc: "<strong>התקלה במנוע:</strong> תקן הבטיחות מבטיח: <em>'אם המבער פועל (A) אז שסתום הקיטור פתוח (B)'</em> (A → B).<br>" +
+                      "מערכת אזעקת החירום חייבת להידרך <strong>אך ורק כאשר התקן מופר (מצב כשל מסוכן)!</strong> כלומר: ¬(A → B).<br>" +
+                      "💡 <strong>משימת השולחן:</strong> השלימו את טבלת האמת וגלו את הפסוק המפושט המינימלי שמגדיר מתי מתרחש הכשל (רמז: מתי יש אש אך אין קיטור?).",
+                cols: ["A", "B", "A → B", "¬(A → B)", "A ∧ ¬B"],
                 rows: [
-                    { a: "T", b: "T", correct: ["T", "T"] },
-                    { a: "T", b: "F", correct: ["F", "T"] },
-                    { a: "F", b: "T", correct: ["F", "T"] },
-                    { a: "F", b: "F", correct: ["F", "F"] }
+                    { a: "T", b: "T", correct: ["T", "F", "F"] },
+                    { a: "T", b: "F", correct: ["F", "T", "T"] }, // הכשל!
+                    { a: "F", b: "T", correct: ["T", "F", "F"] },
+                    { a: "F", b: "F", correct: ["T", "F", "F"] }
                 ],
-                validFormulas: ["A∧B", "B∧A", "(A∧B)", "P=A∧B"]
+                validFormulas: ["A∧¬B", "A∧(¬B)", "(A)∧(¬B)", "¬(A→B)≡A∧¬B"],
+                color: "#f59e0b",
+                bg: "rgba(245, 158, 11, 0.15)"
             },
             2: {
-                name: "צוות בטא (קבוצה 2)",
-                cls: "tb-2",
-                border: "#0284c7",
-                title: "🎯 כתב חידה 2: חוזה החיישנים ומלכודת הגרירה",
-                desc: "על מסלול הכדור פועל חוזה אבטחה: <strong>'אם המחסום מורם (A), אז חיישן הלייזר יירה (B)'</strong> (A → B).<br>מתי מפרים את החוזה (שקר)? רק אם המחסום הורם אך הלייזר לא ירה!<br>אם המחסום לא הורם כלל (A=F) – החוזה לא הופר (אמת)!<br>💡 <strong>משימה:</strong> נסחו מחדש את החוזה באמצעות 'לא' ו-'או' (¬A ∨ B) כדי לירות את הלייזר לפריזמה.",
-                cols: ["A", "B", "A → B", "¬A ∨ B"],
+                title: "🎯 תחנה 2: שער הלייזר – מעגל הגיבוי החלופי",
+                desc: "<strong>התקלה במעבד:</strong> שער הלייזר פועל בגרירה: <em>'אם השער מורם (A) אז הלייזר יורה (B)'</em> (A → B).<br>" +
+                      "מעבד הלייזר נשרף, ומעגל הגיבוי מסוגל לפעול אך ורק באמצעות <strong>שערי 'לא' (¬) ו-'או' (∨)</strong>, ללא שער גרירה!<br>" +
+                      "💡 <strong>משימת השולחן:</strong> היעזרו בנוסחאון הבסיס, השלימו את הטבלה ומצאו את הפסוק השקול שיחליף את המעבד השרוף.",
+                cols: ["A", "B", "¬A", "A → B", "¬A ∨ B"],
                 rows: [
-                    { a: "T", b: "T", correct: ["T", "T"] },
-                    { a: "T", b: "F", correct: ["F", "F"] },
-                    { a: "F", b: "T", correct: ["T", "T"] },
-                    { a: "F", b: "F", correct: ["T", "T"] }
+                    { a: "T", b: "T", correct: ["F", "T", "T"] },
+                    { a: "T", b: "F", correct: ["F", "F", "F"] },
+                    { a: "F", b: "T", correct: ["T", "T", "T"] },
+                    { a: "F", b: "F", correct: ["T", "T", "T"] }
                 ],
-                validFormulas: ["A→B", "¬A∨B", "(¬A)∨B", "A→B≡¬A∨B"]
+                validFormulas: ["¬A∨B", "(¬A)∨B", "B∨¬A", "A→B≡¬A∨B"],
+                color: "#0284c7",
+                bg: "rgba(2, 132, 199, 0.15)"
             },
             3: {
-                name: "צוות גמא (קבוצה 3)",
-                cls: "tb-3",
-                border: "#10b981",
-                title: "🧪 כתב חידה 3: כור החומרים המסוכנים (דה-מורגן 1)",
-                desc: "אזעקת חירום! בכור הפלזמה יש נתרן (A) ומים (B). כלל הבטיחות העליון קובע: <strong>אסור בשום אופן שגם נתרן וגם מים יהיו יחד!</strong> כלומר: ¬(A ∧ B).<br>כיצד ננסח זאת בעזרת 'או'? כדי שלא יהיו שניהם, מספיק ש... <strong>או שאין נתרן, או שאין מים!</strong><br>💡 <strong>משימה:</strong> הוכיחו בטבלה והזינו את חוק דה-מורגן הראשון כדי לייצב את הפלזמה.",
+                title: "🧪 תחנה 3: כור הפלזמה – בידוד נתרן ומים (דה-מורגן 1)",
+                desc: "<strong>אזעקת חירום בכור:</strong> במיכל יש נתרן (A) ומים (B). כלל הבטיחות העליון קובע: <strong>אסור בשום אופן שגם נתרן וגם מים ייכנסו יחד!</strong> כלומר: ¬(A ∧ B).<br>" +
+                      "מחשב הבטיחות דורש פקודת שסתומים מקבילית המוגדרת באמצעות שער <strong>'או' (∨)</strong> של השלילות בנפרד.<br>" +
+                      "💡 <strong>משימת השולחן:</strong> היעזרו בחוק דה-מורגן 1, השלימו את הטבלה והזינו את פקודת השסתומים המפושטת.",
                 cols: ["A", "B", "A ∧ B", "¬(A ∧ B)", "¬A ∨ ¬B"],
                 rows: [
                     { a: "T", b: "T", correct: ["T", "F", "F"] },
@@ -372,14 +715,15 @@
                     { a: "F", b: "T", correct: ["F", "T", "T"] },
                     { a: "F", b: "F", correct: ["F", "T", "T"] }
                 ],
-                validFormulas: ["¬(A∧B)≡¬A∨¬B", "¬(A∧B)", "¬A∨¬B", "(¬A)∨(¬B)"]
+                validFormulas: ["¬A∨¬B", "(¬A)∨(¬B)", "¬B∨¬A", "¬(A∧B)≡¬A∨¬B"],
+                color: "#10b981",
+                bg: "rgba(16, 185, 129, 0.15)"
             },
             4: {
-                name: "צוות דלתא (קבוצה 4)",
-                cls: "tb-4",
-                border: "#a855f7",
-                title: "🌀 כתב חידה 4: נעילת הטורבינה וההמראה (דה-מורגן 2)",
-                desc: "הטורבינה מוכנה אך נעולה על ידי שני בלמי חירום (A ו-B). מפקד הטיסה מכריז: <strong>הטורבינה לא תמריא אם בלם A מופעל או בלם B מופעל!</strong> כלומר: ¬(A ∨ B).<br>מה חייב להתקיים כדי להמריא? חייב ש... <strong>גם בלם A לא יפעל וגם בלם B לא יפעל!</strong><br>💡 <strong>משימה:</strong> הוכיחו בטבלה והזינו את חוק דה-מורגן השני כדי לשחרר את הבלמים.",
+                title: "🌀 תחנה 4: טורבינת העל – שחרור בלמים כפול (דה-מורגן 2)",
+                desc: "<strong>נעילת חירום בחללית:</strong> הטורבינה נעולה על ידי שני בלמים מגנטיים (A ו-B). מפקד הטיסה מתריע: <strong>הטורבינה לא תמריא אם בלם A מופעל או בלם B מופעל!</strong> כלומר: ¬(A ∨ B).<br>" +
+                      "מערכת ההמראה דורשת פקודת שחרור ישירה המגדירה מה הסטטוס הנדרש מכל בלם בנפרד באמצעות קשר <strong>'וגם' (∧)</strong>.<br>" +
+                      "💡 <strong>משימת השולחן:</strong> היעזרו בחוק דה-מורגן 2, השלימו את הטבלה והזינו את פקודת השחרור המפושטת להמראה.",
                 cols: ["A", "B", "A ∨ B", "¬(A ∨ B)", "¬A ∧ ¬B"],
                 rows: [
                     { a: "T", b: "T", correct: ["T", "F", "F"] },
@@ -387,77 +731,264 @@
                     { a: "F", b: "T", correct: ["T", "F", "F"] },
                     { a: "F", b: "F", correct: ["F", "T", "T"] }
                 ],
-                validFormulas: ["¬(A∨B)≡¬A∧¬B", "¬(A∨B)", "¬A∧¬B", "(¬A)∧(¬B)"]
+                validFormulas: ["¬A∧¬B", "(¬A)∧(¬B)", "¬B∧¬A", "¬(A∨B)≡¬A∧¬B"],
+                color: "#a855f7",
+                bg: "rgba(168, 85, 247, 0.15)"
             }
         };
 
-        // Current state for team
+        // State variables
+        let selectedMembers = [];
+        let assignedSlot = null; // e.g. "1a", "2b"
+        let currentTeam = 1;
         let userTable = [];
         let formula = "";
 
-        function initTeamUI() {
-            const t = TEAMS[currentTeam];
-            const badge = document.getElementById('teamBadge');
-            badge.innerText = t.name;
-            badge.className = "team-badge " + t.cls;
+        // Realtime MQTT Setup
+        const ROOM = "ami-asaf-logic-2026";
+        let mqttClient = null;
 
-            const card = document.getElementById('riddleCard');
-            card.style.borderColor = t.border;
-            document.getElementById('riddleTitle').innerHTML = t.title;
-            document.getElementById('riddleTitle').style.color = t.border;
-            document.getElementById('riddleDesc').innerHTML = t.desc;
+        function connectMQTT() {
+            try {
+                mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
+                    clientId: 'ami_client_' + Math.random().toString(16).substr(2, 8),
+                    keepalive: 60
+                });
+                mqttClient.on('connect', () => {
+                    document.getElementById('connDot').style.background = "#10b981";
+                    document.getElementById('connText').innerText = "מחובר למקרן";
+                });
+                mqttClient.on('error', () => {
+                    document.getElementById('connDot').style.background = "#f59e0b";
+                    document.getElementById('connText').innerText = "חיבור מקומי";
+                });
+            } catch(e){}
+        }
 
-            // Render Table
-            userTable = t.rows.map(r => r.correct.map(() => null));
-            renderTable();
+        // ============================================================
+        // ROSTER SELECTION LOGIC
+        // ============================================================
+        function initRoster() {
+            const grid = document.getElementById('rosterGrid');
+            grid.innerHTML = "";
+            STUDENTS.forEach(name => {
+                const el = document.createElement('div');
+                el.className = 'student-item';
+                el.innerText = name;
+                el.onclick = () => toggleStudent(name, el);
+                grid.appendChild(el);
+            });
+        }
 
-            // Clear formula
+        function toggleStudent(name, el) {
+            playTick();
+            const idx = selectedMembers.indexOf(name);
+            if (idx > -1) {
+                selectedMembers.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                if (selectedMembers.length >= 5) {
+                    alert("ניתן לבחור עד 5 תלמידים לשולחן.");
+                    return;
+                }
+                selectedMembers.push(name);
+                el.classList.add('selected');
+            }
+            updateSelectedChips();
+        }
+
+        function updateSelectedChips() {
+            const box = document.getElementById('selectedBox');
+            const btn = document.getElementById('btnSpin');
+            box.innerHTML = "";
+
+            if (selectedMembers.length === 0) {
+                box.innerHTML = '<span class="chip-placeholder">טרם נבחרו תלמידים (סמנו מהרשימה למטה)</span>';
+                btn.disabled = true;
+                return;
+            }
+
+            selectedMembers.forEach(name => {
+                const chip = document.createElement('span');
+                chip.className = 'chip';
+                chip.innerHTML = `${name} <span class="chip-remove" onclick="removeChip('${name}')">✕</span>`;
+                box.appendChild(chip);
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = `<span>🎲 הגרל אתגר ל-${selectedMembers.length} התלמידים!</span>`;
+        }
+
+        function removeChip(name) {
+            playTick();
+            const idx = selectedMembers.indexOf(name);
+            if (idx > -1) selectedMembers.splice(idx, 1);
+            // unselect in grid
+            const items = document.querySelectorAll('.student-item');
+            items.forEach(it => {
+                if (it.innerText === name) it.classList.remove('selected');
+            });
+            updateSelectedChips();
+        }
+
+        function filterRoster() {
+            const query = document.getElementById('searchRoster').value.trim();
+            const items = document.querySelectorAll('.student-item');
+            items.forEach(it => {
+                it.style.display = it.innerText.includes(query) ? "block" : "none";
+            });
+        }
+
+        // ============================================================
+        // LOTTERY SPIN & ASSIGNMENT
+        // ============================================================
+        const ALL_SLOTS = ["1a", "1b", "2a", "2b", "3a", "3b", "4a", "4b"];
+        const SLOT_NAMES = {
+            "1a": "שולחן 1א' (מנוע הקיטור)",
+            "1b": "שולחן 1ב' (מנוע הקיטור)",
+            "2a": "שולחן 2א' (שער הלייזר)",
+            "2b": "שולחן 2ב' (שער הלייזר)",
+            "3a": "שולחן 3א' (כור הפלזמה)",
+            "3b": "שולחן 3ב' (כור הפלזמה)",
+            "4a": "שולחן 4א' (טורבינת העל)",
+            "4b": "שולחן 4ב' (טורבינת העל)"
+        };
+
+        function startSlotLottery() {
+            initAudio();
+            playTick();
+
+            // Check if slot forced in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const forcedSlot = urlParams.get('slot');
+
+            // Switch to spin screen
+            document.getElementById('checkin-screen').style.display = 'none';
+            document.getElementById('spin-overlay').style.display = 'block';
+
+            let count = 0;
+            const spinInt = setInterval(() => {
+                count++;
+                playTick();
+                const randomSlot = ALL_SLOTS[Math.floor(Math.random() * ALL_SLOTS.length)];
+                document.getElementById('spinText').innerText = "מגריל... " + SLOT_NAMES[randomSlot];
+
+                if (count >= 12) {
+                    clearInterval(spinInt);
+                    
+                    // Final assignment
+                    assignedSlot = forcedSlot && ALL_SLOTS.includes(forcedSlot) ? forcedSlot : randomSlot;
+                    currentTeam = parseInt(assignedSlot[0]);
+
+                    document.getElementById('spinText').innerHTML = `🎉 מזל טוב!<br>הוגרלתם ל: <strong>${SLOT_NAMES[assignedSlot]}</strong>`;
+                    playChime();
+
+                    // Broadcast join event to Projector over MQTT
+                    if (mqttClient && mqttClient.connected) {
+                        mqttClient.publish(`${ROOM}/join`, JSON.stringify({
+                            slot: assignedSlot,
+                            team: currentTeam,
+                            members: selectedMembers,
+                            timestamp: Date.now()
+                        }));
+                    }
+
+                    setTimeout(() => {
+                        document.getElementById('spin-overlay').style.display = 'none';
+                        document.getElementById('mission-screen').style.display = 'flex';
+                        initMissionUI();
+                    }, 1400);
+                }
+            }, 120);
+        }
+
+        // ============================================================
+        // MISSION WORKSPACE SETUP
+        // ============================================================
+        function initMissionUI() {
+            const st = STATIONS[currentTeam];
+
+            // Banner styling
+            const banner = document.getElementById('tableBanner');
+            banner.style.background = st.bg;
+            banner.style.border = `1px solid ${st.color}`;
+            document.getElementById('tableTag').innerHTML = `🎯 ${SLOT_NAMES[assignedSlot]}`;
+            document.getElementById('tableTag').style.color = st.color;
+            document.getElementById('membersSummary').innerText = `חברי השולחן: ${selectedMembers.join(', ')}`;
+
+            // Riddle Card
+            document.getElementById('riddleTitle').innerHTML = st.title;
+            document.getElementById('riddleTitle').style.color = st.color;
+            document.getElementById('riddleDesc').innerHTML = st.desc;
+            document.getElementById('riddleCard').style.borderLeftColor = st.color;
+
+            // Render 5-Column Truth Table
+            const thRow = document.getElementById('tableHead');
+            thRow.innerHTML = "";
+            st.cols.forEach(c => {
+                const th = document.createElement('th');
+                th.innerText = c;
+                thRow.appendChild(th);
+            });
+
+            const tBody = document.getElementById('tableBody');
+            tBody.innerHTML = "";
+            userTable = [];
+
+            st.rows.forEach((r, rIdx) => {
+                userTable.push(new Array(r.correct.length).fill(null));
+                const tr = document.createElement('tr');
+
+                // Inputs A and B
+                tr.innerHTML = `<td style="font-weight:bold; color:#f8fafc; font-family:Consolas;">${r.a}</td>
+                                <td style="font-weight:bold; color:#f8fafc; font-family:Consolas;">${r.b}</td>`;
+
+                // Calculate/Input cells
+                r.correct.forEach((_, cIdx) => {
+                    const td = document.createElement('td');
+                    const btn = document.createElement('div');
+                    btn.className = "input-cell";
+                    btn.innerText = "?";
+                    btn.onclick = () => cycleCell(rIdx, cIdx, btn);
+                    td.appendChild(btn);
+                    tr.appendChild(td);
+                });
+
+                tBody.appendChild(tr);
+            });
+
             formula = "";
             updateFormulaDisp();
             hideToast();
         }
 
-        function renderTable() {
-            const t = TEAMS[currentTeam];
-            let html = "<thead><tr>";
-            t.cols.forEach(c => html += `<th>${c}</th>`);
-            html += "</tr></thead><tbody>";
+        // Truth table cell tap cycler: ? -> T -> F -> ?
+        function cycleCell(rIdx, cIdx, btn) {
+            playTick();
+            const cur = userTable[rIdx][cIdx];
+            let next = null;
+            if (cur === null) next = "T";
+            else if (cur === "T") next = "F";
+            else next = null;
 
-            t.rows.forEach((r, rIdx) => {
-                html += `<tr><td><strong>${r.a}</strong></td><td><strong>${r.b}</strong></td>`;
-                userTable[rIdx].forEach((val, cIdx) => {
-                    const cls = val === "T" ? "val-t" : (val === "F" ? "val-f" : "");
-                    const lbl = val || "?";
-                    html += `<td><button class="tt-btn ${cls}" onclick="toggleCell(${rIdx}, ${cIdx})">${lbl}</button></td>`;
-                });
-                html += "</tr>";
-            });
-            html += "</tbody>";
-            document.getElementById('truthTable').innerHTML = html;
+            userTable[rIdx][cIdx] = next;
+            btn.innerText = next ? next : "?";
+            btn.className = "input-cell" + (next ? ` val-${next}` : "");
         }
 
-        function toggleCell(rIdx, cIdx) {
-            playAudioTick();
-            let curr = userTable[rIdx][cIdx];
-            if (!curr) userTable[rIdx][cIdx] = "T";
-            else if (curr === "T") userTable[rIdx][cIdx] = "F";
-            else userTable[rIdx][cIdx] = null;
-            renderTable();
-        }
-
-        // Keypad actions
-        function add(sym) {
-            playAudioTick();
-            formula += sym;
+        // Formula Keypad Functions
+        function addSym(s) {
+            playTick();
+            formula += s;
             updateFormulaDisp();
         }
-        function del() {
-            playAudioTick();
+        function backspaceFormula() {
+            playTick();
             formula = formula.slice(0, -1);
             updateFormulaDisp();
         }
-        function clearF() {
-            playAudioTick();
+        function clearFormula() {
+            playTick();
             formula = "";
             updateFormulaDisp();
         }
@@ -465,128 +996,49 @@
             document.getElementById('formulaDisp').innerText = formula || "_";
         }
 
-        function changeTeam(val) {
-            currentTeam = parseInt(val);
-            initTeamUI();
-        }
-
-        // Realtime MQTT client over WebSocket
-        const ROOM = "ami-asaf-logic-2026";
-        let mqttClient = null;
-
-        function connectMQTT() {
-            try {
-                mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
-                    clientId: 'ami_mobile_' + Math.random().toString(16).substr(2, 8),
-                    keepalive: 60
-                });
-
-                mqttClient.on('connect', () => {
-                    document.getElementById('connDot').style.background = "#10b981";
-                    document.getElementById('connDot').style.boxShadow = "0 0 8px #10b981";
-                    document.getElementById('connText').innerText = "מחובר למכונה";
-                });
-
-                mqttClient.on('error', () => {
-                    document.getElementById('connDot').style.background = "#f59e0b";
-                    document.getElementById('connText').innerText = "חיבור מקומי";
-                });
-            } catch(e) {
-                console.log("MQTT offline mode", e);
-            }
-        }
-
-        // Web Audio Synthesizer
-        let audioCtx = null;
-        function playAudioTick() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } catch(e){}
-        }
-
-        function playSuccessSound() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = "triangle";
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
-                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime + i * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.3);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(audioCtx.currentTime + i * 0.1);
-                    osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
-                });
-            } catch(e){}
-        }
-
-        function playErrorSound() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.25);
-            } catch(e){}
-        }
-
+        // Toasts
         function showToast(msg, isSuccess) {
-            const toast = document.getElementById('toast');
-            toast.className = "toast " + (isSuccess ? "toast-success" : "toast-error");
-            toast.innerHTML = msg;
-            toast.style.display = "block";
+            const t = document.getElementById('toast');
+            t.className = "toast " + (isSuccess ? "toast-success" : "toast-error");
+            t.innerHTML = msg;
+            t.style.display = "block";
         }
         function hideToast() {
             document.getElementById('toast').style.display = "none";
         }
 
-        // Submit logic
-        function submitToMachine() {
-            const t = TEAMS[currentTeam];
-            
-            // Check table
-            let tableComplete = true;
-            let tableCorrect = true;
-            t.rows.forEach((r, rIdx) => {
+        // ============================================================
+        // SOLUTION VALIDATION & SUBMISSION
+        // ============================================================
+        function submitSolution() {
+            initAudio();
+            const st = STATIONS[currentTeam];
+
+            // 1. Verify Truth Table is Complete and Accurate
+            let complete = true;
+            let correct = true;
+            st.rows.forEach((r, rIdx) => {
                 userTable[rIdx].forEach((val, cIdx) => {
-                    if (!val) tableComplete = false;
-                    if (val !== r.correct[cIdx]) tableCorrect = false;
+                    if (!val) complete = false;
+                    if (val !== r.correct[cIdx]) correct = false;
                 });
             });
 
-            if (!tableComplete) {
+            if (!complete) {
                 playErrorSound();
-                showToast("⚠️ טבלת האמת לא מלאה! השלימו את כל המשבצות.", false);
+                showToast("⚠️ טבלת האמת אינה מלאה! השלימו את כל המשבצות.", false);
                 return;
             }
-            if (!tableCorrect) {
+            if (!correct) {
                 playErrorSound();
-                showToast("❌ יש טעות בטבלת האמת! בדקו שוב את שורות הטבלה.", false);
+                showToast("❌ יש טעות בטבלת האמת! היעזרו בנוסחאון ובדקו שוב את השורות.", false);
                 return;
             }
 
-            // Check formula
+            // 2. Verify Deduce Formula
             const clean = formula.replace(/\s+/g, '');
             let formulaOk = false;
-            for (let v of t.validFormulas) {
+            for (let v of st.validFormulas) {
                 if (clean.includes(v.replace(/\s+/g, ''))) {
                     formulaOk = true;
                     break;
@@ -595,35 +1047,41 @@
 
             if (!formulaOk) {
                 playErrorSound();
-                showToast("❌ הפסוק הלוגי אינו תואם לחידה! היעזרו ברמז בכתב החידה.", false);
+                showToast("❌ הפסוק הלוגי אינו תואם לחידה או שאינו מפושט למינימום שערים! היעזרו בנוסחאון הבסיס.", false);
                 return;
             }
 
-            // ALL CORRECT!
-            playSuccessSound();
-            showToast("🎉 מצוין! התחנה שוחררה בהצלחה ושודרה למקרן!", true);
+            // SUCCESS!
+            playChime();
+            showToast("🎉 אלוף! הפתרון מדויק! שודר בהצלחה למקרן הכיתה!", true);
 
-            // Transmit via MQTT
-            const payload = JSON.stringify({
-                team: currentTeam,
-                formula: formula,
-                timestamp: Date.now()
-            });
-
+            // Broadcast Solve event to Projector over MQTT
             if (mqttClient && mqttClient.connected) {
-                mqttClient.publish(`${ROOM}/unlock`, payload);
+                mqttClient.publish(`${ROOM}/unlock`, JSON.stringify({
+                    slot: assignedSlot,
+                    team: currentTeam,
+                    members: selectedMembers,
+                    formula: formula,
+                    timestamp: Date.now()
+                }));
             }
-
-            // Also save to localStorage for local testing on same machine
-            localStorage.setItem(`ami_unlocked_team_${currentTeam}`, JSON.stringify({
-                formula: formula,
-                time: Date.now()
-            }));
         }
 
-        // Startup
-        initTeamUI();
-        connectMQTT();
+        // Check if URL specifies team directly (for manual testing)
+        window.addEventListener('DOMContentLoaded', () => {
+            initRoster();
+            connectMQTT();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('team')) {
+                currentTeam = parseInt(urlParams.get('team'));
+                assignedSlot = `${currentTeam}a`;
+                selectedMembers = ["תלמיד הדגמה"];
+                document.getElementById('checkin-screen').style.display = 'none';
+                document.getElementById('mission-screen').style.display = 'flex';
+                initMissionUI();
+            }
+        });
     </script>
 </body>
 </html>

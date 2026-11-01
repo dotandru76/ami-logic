@@ -422,6 +422,186 @@
             transform-origin: 0px 0px;
         }
 
+
+        /* 8-Table Monitor Grid Styling */
+        .bottom-consoles-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            direction: ltr; /* Keeps columns 1 -> 2 -> 3 -> 4 left to right */
+        }
+        .station-pod {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            direction: rtl; /* Hebrew RTL inside cards */
+            border: 1px solid #1e293b;
+        }
+        .pod-1 { border-top: 3px solid #f59e0b; }
+        .pod-2 { border-top: 3px solid #0284c7; }
+        .pod-3 { border-top: 3px solid #10b981; }
+        .pod-4 { border-top: 3px solid #a855f7; }
+
+        .pod-header {
+            font-size: 13px;
+            font-weight: 800;
+            color: #f1f5f9;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sub-tables-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sub-table-card {
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+        .sub-table-card.active-thinking {
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+        .sub-table-card.table-solved {
+            background: rgba(6, 78, 59, 0.3);
+            border-color: #10b981 !important;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+        }
+        .stc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stc-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+        .stc-status {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+        .stc-status.thinking {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid #b45309;
+        }
+        .stc-status.solved {
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            border: 1px solid #10b981;
+        }
+        .stc-members {
+            font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.3;
+            min-height: 28px;
+        }
+        .stc-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .btn-quick-solve {
+            background: transparent;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .btn-quick-solve:hover {
+            background: #1e293b;
+            color: #10b981;
+            border-color: #10b981;
+        }
+
+        /* Big QR Modal in Projector Center */
+        .qr-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(3, 7, 18, 0.88);
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-modal-box {
+            background: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 20px;
+            padding: 26px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            max-width: 440px;
+            width: 90%;
+        }
+        .qr-modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #f8fafc;
+            margin-bottom: 8px;
+        }
+        .qr-modal-subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+        .qr-modal-img {
+            width: 260px;
+            height: 260px;
+            border-radius: 12px;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            margin-bottom: 14px;
+        }
+        .qr-modal-close-btn {
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-qr-nav {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            color: white;
+            border: none;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         /* Modal for Riddle Display */
         .modal-overlay {
             position: fixed;
@@ -832,100 +1012,147 @@
         <!-- Bottom Consoles Row: 4 Team Cards with Live QR Codes (Aligned 1 -> 2 -> 3 -> 4) -->
         <div class="bottom-consoles-row">
             
-            <!-- TEAM 1 CONSOLE -->
-            <div class="team-console-card" id="card-team-1">
-                <div class="tc-header">
-                    <span class="tc-team-title" style="color: #f59e0b;">⚙️ צוות 1: אלפא</span>
-                    <span class="tc-status" id="status-tag-1">🔴 ממתין</span>
+            <!-- STATION 1 POD (Tables 1A & 1B) -->
+            <div class="station-pod pod-1">
+                <div class="pod-header">
+                    <span>⚙️ תחנה 1: מנוע הקיטור</span>
+                    <button class="btn-quick-solve" onclick="teacherSolveStation(1)">הפעל תחנה 🔓</button>
                 </div>
-                <div class="tc-body">
-                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 1">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=1" alt="QR צוות 1">
+                <div class="sub-tables-wrap">
+                    <div class="sub-table-card" id="card-slot-1a">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 1א'</span>
+                            <span class="stc-status" id="status-1a">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-1a">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-1a">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('1a', 1)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                    <div class="tc-info">
-                        <strong>כספת שני המפתחות</strong><br>
-                        חוק המנוע: שסתום A פתוח <u>וגם</u> שסתום B פתוח.<br>
-                        <button class="tc-riddle-btn" onclick="showRiddle(1)">📜 קרא חידה</button>
+                    <div class="sub-table-card" id="card-slot-1b">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 1ב'</span>
+                            <span class="stc-status" id="status-1b">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-1b">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-1b">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('1b', 1)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                </div>
-                <div class="tc-actions">
-                    <button class="btn-solve-card" id="btn-solve-1" onclick="teacherSolveStation(1)">
-                        <span>🔓 הפעל תחנה 1</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- TEAM 2 CONSOLE -->
-            <div class="team-console-card" id="card-team-2">
-                <div class="tc-header">
-                    <span class="tc-team-title" style="color: #38bdf8;">🎯 צוות 2: בטא</span>
-                    <span class="tc-status" id="status-tag-2">🔴 ממתין</span>
+            <!-- STATION 2 POD (Tables 2A & 2B) -->
+            <div class="station-pod pod-2">
+                <div class="pod-header">
+                    <span>🎯 תחנה 2: שער הלייזר</span>
+                    <button class="btn-quick-solve" onclick="teacherSolveStation(2)">הפעל תחנה 🔓</button>
                 </div>
-                <div class="tc-body">
-                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 2">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=2" alt="QR צוות 2">
+                <div class="sub-tables-wrap">
+                    <div class="sub-table-card" id="card-slot-2a">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 2א'</span>
+                            <span class="stc-status" id="status-2a">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-2a">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-2a">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('2a', 2)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                    <div class="tc-info">
-                        <strong>מלכודת החיישנים (גרירה)</strong><br>
-                        חוק המערכת: אם המחסום מורם אז הלייזר יורה.<br>
-                        <button class="tc-riddle-btn" onclick="showRiddle(2)">📜 קרא חידה</button>
+                    <div class="sub-table-card" id="card-slot-2b">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 2ב'</span>
+                            <span class="stc-status" id="status-2b">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-2b">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-2b">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('2b', 2)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                </div>
-                <div class="tc-actions">
-                    <button class="btn-solve-card" id="btn-solve-2" onclick="teacherSolveStation(2)">
-                        <span>🔓 הפעל תחנה 2</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- TEAM 3 CONSOLE -->
-            <div class="team-console-card" id="card-team-3">
-                <div class="tc-header">
-                    <span class="tc-team-title" style="color: #34d399;">🧪 צוות 3: גמא</span>
-                    <span class="tc-status" id="status-tag-3">🔴 ממתין</span>
+            <!-- STATION 3 POD (Tables 3A & 3B) -->
+            <div class="station-pod pod-3">
+                <div class="pod-header">
+                    <span>🧪 תחנה 3: כור הפלזמה</span>
+                    <button class="btn-quick-solve" onclick="teacherSolveStation(3)">הפעל תחנה 🔓</button>
                 </div>
-                <div class="tc-body">
-                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 3">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=3" alt="QR צוות 3">
+                <div class="sub-tables-wrap">
+                    <div class="sub-table-card" id="card-slot-3a">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 3א'</span>
+                            <span class="stc-status" id="status-3a">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-3a">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-3a">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('3a', 3)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                    <div class="tc-info">
-                        <strong>כור החומרים המסוכנים (דה-מורגן 1)</strong><br>
-                        כלל בטיחות: אסור שגם נתרן וגם מים יהיו יחד.<br>
-                        <button class="tc-riddle-btn" onclick="showRiddle(3)">📜 קרא חידה</button>
+                    <div class="sub-table-card" id="card-slot-3b">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 3ב'</span>
+                            <span class="stc-status" id="status-3b">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-3b">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-3b">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('3b', 3)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                </div>
-                <div class="tc-actions">
-                    <button class="btn-solve-card" id="btn-solve-3" onclick="teacherSolveStation(3)">
-                        <span>🔓 הפעל תחנה 3</span>
-                    </button>
                 </div>
             </div>
 
-            <!-- TEAM 4 CONSOLE -->
-            <div class="team-console-card" id="card-team-4">
-                <div class="tc-header">
-                    <span class="tc-team-title" style="color: #c084fc;">🌀 צוות 4: דלתא</span>
-                    <span class="tc-status" id="status-tag-4">🔴 ממתין</span>
+            <!-- STATION 4 POD (Tables 4A & 4B) -->
+            <div class="station-pod pod-4">
+                <div class="pod-header">
+                    <span>🌀 תחנה 4: טורבינת העל</span>
+                    <button class="btn-quick-solve" onclick="teacherSolveStation(4)">הפעל תחנה 🔓</button>
                 </div>
-                <div class="tc-body">
-                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 4">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=4" alt="QR צוות 4">
+                <div class="sub-tables-wrap">
+                    <div class="sub-table-card" id="card-slot-4a">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 4א'</span>
+                            <span class="stc-status" id="status-4a">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-4a">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-4a">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('4a', 4)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                    <div class="tc-info">
-                        <strong>טורבינת החלל וההמראה (דה-מורגן 2)</strong><br>
-                        נוהל המראה: ביטול שני בלמי החירום המגנטיים.<br>
-                        <button class="tc-riddle-btn" onclick="showRiddle(4)">📜 קרא חידה</button>
+                    <div class="sub-table-card" id="card-slot-4b">
+                        <div class="stc-top">
+                            <span class="stc-name">שולחן 4ב'</span>
+                            <span class="stc-status" id="status-4b">⚪ ממתין</span>
+                        </div>
+                        <div class="stc-members" id="members-4b">טרם התחברו סורקים</div>
+                        <div class="stc-footer">
+                            <span class="stc-time" id="time-4b">-</span>
+                            <button class="btn-quick-solve" onclick="teacherSolveSlot('4b', 4)">[פיצוח 🔓]</button>
+                        </div>
                     </div>
-                </div>
-                <div class="tc-actions">
-                    <button class="btn-solve-card" id="btn-solve-4" onclick="teacherSolveStation(4)">
-                        <span>🔓 הפעל תחנה 4</span>
-                    </button>
                 </div>
             </div>
 
         </div>
     </main>
+
+    <!-- Big Center QR Modal for All Students (Phone / Tablet / iPad) -->
+    <div class="qr-modal-overlay" id="qrModal" onclick="closeQRModal(event)">
+        <div class="qr-modal-box" onclick="event.stopPropagation()">
+            <div class="qr-modal-title">📱 סריקת כניסה למכונה הלוגית</div>
+            <div class="qr-modal-subtitle">סרקו מהטלפון או מהטאבלט • סמנו את חברי השולחן • והגרילו את האתגר שלכם!</div>
+            <img class="qr-modal-img" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://dotandru76.github.io/ami-logic/" alt="QR כיתתי">
+            <div style="font-size: 13px; color: #38bdf8; font-family: monospace; font-weight: bold; margin-bottom: 14px;">dotandru76.github.io/ami-logic</div>
+            <button class="qr-modal-close-btn" onclick="closeQRModal()">✕ סגור וחזור למכונה</button>
+        </div>
+    </div>
 
     <!-- Riddle Modal -->
     <div class="modal-overlay" id="riddleModal" onclick="closeRiddleModal(event)">
@@ -1312,6 +1539,77 @@
             launchConfetti();
         }
 
+
+        // 8-Table Monitor & Slot Management
+        let solvedTablesCount = 0;
+        const slotsState = {
+            '1a': { joined: false, solved: false, members: [] },
+            '1b': { joined: false, solved: false, members: [] },
+            '2a': { joined: false, solved: false, members: [] },
+            '2b': { joined: false, solved: false, members: [] },
+            '3a': { joined: false, solved: false, members: [] },
+            '3b': { joined: false, solved: false, members: [] },
+            '4a': { joined: false, solved: false, members: [] },
+            '4b': { joined: false, solved: false, members: [] }
+        };
+
+        function openQRModal() {
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+        function closeQRModal(e) {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+
+        function handleTableJoin(slot, members) {
+            if (!slotsState[slot]) return;
+            slotsState[slot].joined = true;
+            slotsState[slot].members = members;
+
+            const card = document.getElementById(`card-slot-${slot}`);
+            const statusEl = document.getElementById(`status-${slot}`);
+            const membersEl = document.getElementById(`members-${slot}`);
+
+            if (card && statusEl && membersEl) {
+                card.classList.add('active-thinking');
+                statusEl.className = "stc-status thinking";
+                statusEl.innerText = "🟡 חושבים...";
+                membersEl.innerText = members.join(', ');
+            }
+        }
+
+        function handleTableSolve(slot, teamNum) {
+            if (!slotsState[slot]) return;
+            if (slotsState[slot].solved) return; // already solved
+
+            slotsState[slot].solved = true;
+            solvedTablesCount++;
+            document.getElementById('solvedCount').innerText = solvedTablesCount;
+
+            const card = document.getElementById(`card-slot-${slot}`);
+            const statusEl = document.getElementById(`status-${slot}`);
+            const timeEl = document.getElementById(`time-${slot}`);
+
+            if (card && statusEl) {
+                card.classList.remove('active-thinking');
+                card.classList.add('table-solved');
+                statusEl.className = "stc-status solved";
+                statusEl.innerText = "🟢 פתר!";
+                const now = new Date();
+                timeEl.innerText = `פיצוח: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            }
+
+            // Unlock the physical station machine on the projector canvas
+            if (teamNum === 1) activateStation1();
+            if (teamNum === 2) activateStation2();
+            if (teamNum === 3) activateStation3();
+            if (teamNum === 4) activateStation4();
+        }
+
+        function teacherSolveSlot(slot, teamNum) {
+            initAudio();
+            handleTableSolve(slot, teamNum);
+        }
+
         function teacherSolveStation(num) {
             initAudio();
             if (num === 1) activateStation1();
@@ -1355,9 +1653,9 @@
                 });
 
                 mqttClient.on('connect', () => {
-                    mqttClient.subscribe(`${ROOM}/unlock`, (err) => {
+                    mqttClient.subscribe([`${ROOM}/unlock`, `${ROOM}/join`], (err) => {
                         if (!err) {
-                            console.log("SUCCESS: Subscribed to " + ROOM + "/unlock");
+                            console.log("SUCCESS: Subscribed to " + ROOM + " topics");
                         } else {
                             console.error("MQTT Subscribe error:", err);
                         }
@@ -1366,14 +1664,15 @@
 
                 mqttClient.on('message', (topic, message) => {
                     try {
-                        console.log("Received MQTT message on", topic, message.toString());
                         const data = JSON.parse(message.toString());
-                        if (data && data.team) {
+                        console.log("MQTT Received:", topic, data);
+
+                        if (topic.endsWith('/join') && data.slot) {
+                            handleTableJoin(data.slot, data.members || []);
+                        } else if (topic.endsWith('/unlock')) {
                             const teamNum = parseInt(data.team);
-                            if (teamNum >= 1 && teamNum <= 4) {
-                                console.log("Unlocking station for team", teamNum);
-                                teacherSolveStation(teamNum);
-                            }
+                            const slot = data.slot || `${teamNum}a`;
+                            handleTableSolve(slot, teamNum);
                         }
                     } catch(e) {
                         console.error("Error processing MQTT message:", e);
@@ -1389,7 +1688,7 @@
         }
 
         // 10-Minute Timer
-        let timerSeconds = 600;
+        let timerSeconds = 1200;
         let timerInterval = null;
 
         function updateTimerDisplay() {
