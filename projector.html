@@ -675,19 +675,26 @@
         </div>
 
         <div class="top-controls">
-            <!-- Timer -->
+            <!-- Big Central QR Code Button -->
+            <button class="btn-qr-nav" onclick="openQRModal()">
+                <span>📱 סריקת QR להצטרפות הכיתה</span>
+            </button>
+
+            <!-- Solved Count Badge -->
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 8px; padding: 6px 12px; font-weight: bold; font-size: 13px; color: #6ee7b7; display: flex; align-items: center; gap: 6px;">
+                🏆 פיצוח שולחנות: <span id="solvedCount" style="color: white; font-size: 16px; font-weight: 900;">0</span> / 8
+            </div>
+
+            <!-- 20-Minute Timer -->
             <div class="timer-box">
                 <span style="font-size: 16px;">⏱️</span>
-                <span class="timer-digits" id="timerDigits">10:00</span>
+                <span class="timer-digits" id="timerDigits">20:00</span>
                 <button class="btn-ctrl" onclick="toggleTimer()" id="btnTimer">הפעל</button>
                 <button class="btn-ctrl" onclick="resetTimer()">איפוס</button>
             </div>
 
             <!-- Sound Toggle -->
             <button class="btn-ctrl" onclick="toggleSound()" id="btnSound">🔊 צלילים: פועל</button>
-
-            <!-- All Clues Button -->
-            <button class="btn-ctrl" onclick="showAllRiddles()">📜 כל 4 כתבי החידה</button>
 
             <!-- Master Chain Reaction Button -->
             <button class="btn-master" onclick="runMasterChainReaction()">
