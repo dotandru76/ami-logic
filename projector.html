@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המכונה הלוגית המופלאה • THE INCREDIBLE LOGIC MACHINE • חט"ב עמי אסף</title>
+    <!-- MQTT.js for Realtime Sync with Student Phones -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #060911;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            direction: rtl;
+        }
+
+        /* Top Header Bar */
+        .top-bar {
+            background: linear-gradient(180deg, #0d1527 0%, #080c18 100%);
+            border-bottom: 2px solid #1e293b;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            z-index: 50;
+        }
+        .app-title-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .app-logo {
+            font-size: 28px;
+            animation: pulseGear 4s infinite linear;
+        }
+        .app-title {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .app-sub {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: normal;
+        }
+
+        /* Top Controls */
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .timer-box {
+            background: #030712;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+        }
+        .timer-digits {
+            font-family: 'Consolas', monospace;
+            font-size: 24px;
+            font-weight: 900;
+            color: #60a5fa;
+            letter-spacing: 2px;
+            direction: ltr;
+        }
+        .btn-ctrl {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-ctrl:hover {
+            background: #334155;
+            color: white;
+        }
+        .btn-master {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            border: 2px solid #a78bfa;
+            padding: 8px 20px;
+            font-size: 15px;
+            font-weight: 900;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+            animation: pulseGlow 2.5s infinite;
+        }
+        .btn-master:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 28px rgba(124, 58, 237, 0.8);
+        }
+
+        /* Main Machine Stage Area */
+        .machine-viewport {
+            flex: 1;
+            padding: 12px 20px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .canvas-card {
+            width: 100%;
+            max-width: 1420px;
+            background: radial-gradient(circle at 50% 50%, #0d1527 0%, #050811 100%);
+            border: 2px solid #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 100px rgba(15, 23, 42, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Machine Header Row */
+        .machine-headers-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 2px solid #1e293b;
+            background: rgba(15, 23, 42, 0.7);
+        }
+        .station-header-cell {
+            padding: 10px 14px;
+            text-align: center;
+            border-left: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .station-header-cell:last-child {
+            border-left: none;
+        }
+        .sh-title {
+            font-size: 15px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .sh-tag {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        .st-1 .sh-title { color: #f59e0b; }
+        .st-1 .sh-tag { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #b45309; }
+        .st-2 .sh-title { color: #38bdf8; }
+        .st-2 .sh-tag { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #0284c7; }
+        .st-3 .sh-title { color: #34d399; }
+        .st-3 .sh-tag { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid #047857; }
+        .st-4 .sh-title { color: #c084fc; }
+        .st-4 .sh-tag { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid #7e22ce; }
+
+        /* Panoramic Machine SVG Container */
+        #machine-svg-wrap {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+        #panoramic-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Bottom Team Interactive Consoles (4 Cards with QR) */
+        .bottom-consoles-row {
+            width: 100%;
+            max-width: 1420px;
+            margin-top: 10px;
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .team-console-card {
+            background: #090d16;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .team-console-card.unlocked {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.35) !important;
+            background: linear-gradient(180deg, #091316 0%, #060911 100%);
+        }
+        .tc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .tc-team-title {
+            font-size: 14px;
+            font-weight: 900;
+        }
+        .tc-status {
+            font-size: 11.5px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #1e293b;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tc-status.ok {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #22c55e;
+        }
+        .tc-body {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .qr-wrap {
+            width: 82px;
+            height: 82px;
+            background: white;
+            padding: 3px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .qr-wrap:hover {
+            transform: scale(1.06);
+        }
+        .qr-wrap img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .tc-info {
+            flex: 1;
+            font-size: 12px;
+            line-height: 1.45;
+            color: #cbd5e1;
+        }
+        .tc-riddle-btn {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #38bdf8;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .tc-riddle-btn:hover {
+            background: #334155;
+        }
+        .tc-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 6px;
+        }
+        .btn-solve-card {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #f8fafc;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-solve-card:hover {
+            background: #334155;
+            border-color: #64748b;
+        }
+        .btn-solve-card.success {
+            background: #166534;
+            border-color: #22c55e;
+            color: #bbf7d0;
+        }
+
+        /* Mathematical LTR isolated styling */
+        .math-ltr {
+            direction: ltr !important;
+            unicode-bidi: isolate !important;
+            display: inline-block;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+        }
+
+        /* SVG Animations */
+        @keyframes pulseGear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(124, 58, 237, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.9); }
+        }
+        @keyframes laserFlicker {
+            0%, 100% { opacity: 0.9; stroke-width: 6; }
+            50% { opacity: 1; stroke-width: 9; }
+        }
+        @keyframes plasmaSwirl {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.08) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+        @keyframes steamPuff {
+            0% { transform: translateY(0) scale(0.6); opacity: 0.9; }
+            100% { transform: translateY(-40px) scale(1.6); opacity: 0; }
+        }
+        @keyframes neonPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px #10b981); }
+            50% { filter: drop-shadow(0 0 20px #34d399); }
+        }
+
+        .gear-spinning {
+            animation: pulseGear 3s infinite linear;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        .gear-spinning-rev {
+            animation: pulseGear 3s infinite linear reverse;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        .laser-active {
+            animation: laserFlicker 0.15s infinite;
+        }
+        .plasma-active {
+            animation: plasmaSwirl 4s infinite linear;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        /* Modal for Riddle Display */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 16px;
+            max-width: 650px;
+            width: 100%;
+            padding: 26px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: #1e293b;
+            color: #94a3b8;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            color: white;
+            background: #334155;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+        <div class="app-title-box">
+            <span class="app-logo">⚙️</span>
+            <div>
+                <div class="app-title">המכונה הלוגית המופלאה • THE INCREDIBLE MACHINE</div>
+                <div class="app-sub">ניסוי מעבדה כיתתי בארבע תחנות רציפות • חוקי דה-מורגן ושערים לוגיים • כיתה ח'1 מדעית</div>
+            </div>
+        </div>
+
+        <div class="top-controls">
+            <!-- Timer -->
+            <div class="timer-box">
+                <span style="font-size: 16px;">⏱️</span>
+                <span class="timer-digits" id="timerDigits">10:00</span>
+                <button class="btn-ctrl" onclick="toggleTimer()" id="btnTimer">הפעל</button>
+                <button class="btn-ctrl" onclick="resetTimer()">איפוס</button>
+            </div>
+
+            <!-- Sound Toggle -->
+            <button class="btn-ctrl" onclick="toggleSound()" id="btnSound">🔊 צלילים: פועל</button>
+
+            <!-- All Clues Button -->
+            <button class="btn-ctrl" onclick="showAllRiddles()">📜 כל 4 כתבי החידה</button>
+
+            <!-- Master Chain Reaction Button -->
+            <button class="btn-master" onclick="runMasterChainReaction()">
+                <span>⚡ הפעלת תגובת שרשרת מלאה!</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Viewport -->
+    <main class="machine-viewport">
+        <div class="canvas-card">
+            
+            <!-- Stations Titles Header Row -->
+            <div class="machine-headers-row">
+                <div class="station-header-cell st-1">
+                    <div class="sh-title"><span>1. מנוע הקיטור והשיניים</span></div>
+                    <span class="sh-tag">צוות אלפא (AND / OR)</span>
+                </div>
+                <div class="station-header-cell st-2">
+                    <div class="sh-title"><span>2. שער הלייזר והגרירה</span></div>
+                    <span class="sh-tag">צוות בטא (A → B ≡ ¬A ∨ B)</span>
+                </div>
+                <div class="station-header-cell st-3">
+                    <div class="sh-title"><span>3. כור הפלזמה הכימי</span></div>
+                    <span class="sh-tag">צוות גמא (דה מורגן 1: ¬(A ∧ B))</span>
+                </div>
+                <div class="station-header-cell st-4">
+                    <div class="sh-title"><span>4. טורבינת העל וההמראה</span></div>
+                    <span class="sh-tag">צוות דלתא (דה מורגן 2: ¬(A ∨ B))</span>
+                </div>
+            </div>
+
+            <!-- Panoramic Full SVG Machine Canvas -->
+            <div id="machine-svg-wrap">
+                <svg id="panoramic-svg" viewBox="0 0 1400 420" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <!-- Gradients -->
+                        <linearGradient id="boilerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#475569" />
+                            <stop offset="50%" stop-color="#334155" />
+                            <stop offset="100%" stop-color="#1e293b" />
+                        </linearGradient>
+                        <linearGradient id="brassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a" />
+                            <stop offset="40%" stop-color="#f59e0b" />
+                            <stop offset="100%" stop-color="#78350f" />
+                        </linearGradient>
+                        <linearGradient id="laserGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
+                            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9" />
+                        </linearGradient>
+                        <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#6ee7b7" />
+                            <stop offset="50%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#047857" />
+                        </linearGradient>
+                        <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f8fafc" />
+                            <stop offset="50%" stop-color="#94a3b8" />
+                            <stop offset="100%" stop-color="#334155" />
+                        </linearGradient>
+                        <!-- Glow Filters -->
+                        <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="6" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="7" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="8" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+
+                    <!-- Background Grid & Circuit Traces -->
+                    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="0.7" opacity="0.4" />
+                    </pattern>
+                    <rect width="1400" height="420" fill="url(#grid)" />
+
+                    <!-- Section Separator Dividers -->
+                    <line x1="350" y1="0" x2="350" y2="420" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,4" />
+                    <line x1="700" y1="0" x2="700" y2="420" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,4" />
+                    <line x1="1050" y1="0" x2="1050" y2="420" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,4" />
+
+                    <!-- ========================================================================= -->
+                    <!-- STATION 1: STEAM BOILER & GEAR TRAIN (0 to 350)                           -->
+                    <!-- ========================================================================= -->
+                    <g id="st1-group">
+                        <!-- Boiler -->
+                        <rect x="25" y="110" width="100" height="190" rx="14" fill="url(#boilerGrad)" stroke="#64748b" stroke-width="2.5" />
+                        <line x1="25" y1="150" x2="125" y2="150" stroke="#1e293b" stroke-width="3" />
+                        <line x1="25" y1="240" x2="125" y2="240" stroke="#1e293b" stroke-width="3" />
+                        
+                        <!-- Steam Pressure Gauge -->
+                        <circle cx="75" cy="195" r="24" fill="#090d16" stroke="#f59e0b" stroke-width="2" />
+                        <text x="75" y="190" fill="#94a3b8" font-size="8" text-anchor="middle" font-weight="bold">PSI</text>
+                        <line id="st1-gauge-needle" x1="75" y1="195" x2="88" y2="185" stroke="#ef4444" stroke-width="2" stroke-linecap="round" />
+
+                        <!-- Steam Pipe Out -->
+                        <path d="M 125 150 L 165 150 L 165 210 L 180 210" fill="none" stroke="#475569" stroke-width="10" stroke-linecap="round" />
+                        
+                        <!-- Dual Valve Knobs A & B on pipe -->
+                        <circle cx="145" cy="150" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+                        <text x="145" y="154" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">A</text>
+                        <circle cx="165" cy="180" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+                        <text x="165" y="184" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">B</text>
+
+                        <!-- Piston Chamber -->
+                        <rect x="180" y="198" width="55" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                        <rect id="st1-piston-rod" x="220" y="206" width="40" height="8" rx="2" fill="url(#steelGrad)" />
+
+                        <!-- Gear 1 (Main Brass Gear) -->
+                        <g id="st1-gear-1" transform="translate(250, 210)">
+                            <circle cx="0" cy="0" r="38" fill="url(#brassGrad)" stroke="#78350f" stroke-width="2" />
+                            <circle cx="0" cy="0" r="12" fill="#090d16" stroke="#f59e0b" stroke-width="2" />
+                            <!-- Teeth -->
+                            <rect x="-4" y="-44" width="8" height="10" fill="#f59e0b" />
+                            <rect x="-4" y="34" width="8" height="10" fill="#f59e0b" />
+                            <rect x="-44" y="-4" width="10" height="8" fill="#f59e0b" />
+                            <rect x="34" y="-4" width="10" height="8" fill="#f59e0b" />
+                            <rect x="-31" y="-31" width="8" height="8" fill="#f59e0b" />
+                            <rect x="23" y="23" width="8" height="8" fill="#f59e0b" />
+                            <rect x="-31" y="23" width="8" height="8" fill="#f59e0b" />
+                            <rect x="23" y="-31" width="8" height="8" fill="#f59e0b" />
+                        </g>
+
+                        <!-- Gear 2 (Interlocking Steel Gear) -->
+                        <g id="st1-gear-2" transform="translate(315, 245)">
+                            <circle cx="0" cy="0" r="28" fill="url(#steelGrad)" stroke="#334155" stroke-width="2" />
+                            <circle cx="0" cy="0" r="9" fill="#090d16" />
+                            <!-- Teeth -->
+                            <rect x="-3" y="-32" width="6" height="8" fill="#94a3b8" />
+                            <rect x="-3" y="24" width="6" height="8" fill="#94a3b8" />
+                            <rect x="-32" y="-3" width="8" height="6" fill="#94a3b8" />
+                            <rect x="24" y="-3" width="8" height="6" fill="#94a3b8" />
+                        </g>
+
+                        <!-- Mechanical Tripping Hammer linked to Gear 2 -->
+                        <g id="st1-hammer" transform="translate(315, 245)">
+                            <line x1="0" y1="0" x2="40" y2="-45" stroke="#ef4444" stroke-width="4" stroke-linecap="round" />
+                            <circle cx="40" cy="-45" r="9" fill="#dc2626" stroke="#fca5a5" stroke-width="1.5" />
+                        </g>
+
+                        <!-- Steam cloud particle effect -->
+                        <circle id="st1-steam-cloud" cx="125" cy="110" r="14" fill="#e2e8f0" opacity="0" />
+
+                        <!-- Logic Badge -->
+                        <rect x="40" y="325" width="260" height="34" rx="8" fill="#0f172a" stroke="#b45309" stroke-width="1.5" />
+                        <text x="170" y="347" fill="#fbbf24" font-size="13" font-weight="bold" text-anchor="middle">
+                            שער AND: <tspan direction="ltr" font-family="Consolas" font-weight="bold">P = A ∧ B</tspan>
+                        </text>
+                    </g>
+
+                    <!-- ========================================================================= -->
+                    <!-- STATION 2: GRAVITY MARBLE RAMP & LASER (350 to 700)                       -->
+                    <!-- ========================================================================= -->
+                    <g id="st2-group">
+                        <!-- Lever Trigger Catch (hit by Station 1 hammer) -->
+                        <line id="st2-catch-lever" x1="360" y1="180" x2="385" y2="155" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" />
+
+                        <!-- Marble Holding Cradle -->
+                        <rect x="375" y="130" width="30" height="14" rx="4" fill="#334155" stroke="#64748b" />
+                        
+                        <!-- Marble Ball -->
+                        <circle id="st2-marble" cx="390" cy="120" r="12" fill="url(#steelGrad)" stroke="#e2e8f0" stroke-width="1.5" />
+
+                        <!-- Slanted Marble Tracks (Zigzag) -->
+                        <!-- Ramp 1: 390,132 to 560,180 -->
+                        <line x1="380" y1="135" x2="560" y2="185" stroke="#475569" stroke-width="6" stroke-linecap="round" />
+                        <line x1="380" y1="140" x2="560" y2="190" stroke="#0ea5e9" stroke-width="1.5" />
+
+                        <!-- Red Pneumatic Security Barrier (Gate) -->
+                        <g id="st2-gate" transform="translate(470, 130)">
+                            <line x1="0" y1="0" x2="0" y2="55" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+                            <rect x="-10" y="-12" width="20" height="14" rx="3" fill="#991b1b" stroke="#ef4444" />
+                            <text x="0" y="-2" fill="white" font-size="8" text-anchor="middle" font-weight="bold">LOCK</text>
+                        </g>
+
+                        <!-- Ramp 2: 560,185 to 430,240 -->
+                        <line x1="565" y1="185" x2="430" y2="245" stroke="#475569" stroke-width="6" stroke-linecap="round" />
+                        
+                        <!-- Ramp 3: 430,245 to 620,290 -->
+                        <line x1="425" y1="245" x2="620" y2="295" stroke="#475569" stroke-width="6" stroke-linecap="round" />
+
+                        <!-- Impact Switch at bottom of ramp -->
+                        <circle cx="625" cy="295" r="8" fill="#10b981" id="st2-switch-led" stroke="#34d399" stroke-width="1.5" />
+
+                        <!-- Laser Cannon Housing -->
+                        <rect x="610" y="240" width="60" height="40" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="2" />
+                        <polygon points="670,250 685,245 685,275 670,270" fill="#0284c7" />
+                        <!-- Laser Charging Ring -->
+                        <circle cx="640" cy="260" r="12" fill="#082f49" stroke="#38bdf8" stroke-width="2" id="st2-laser-core" />
+
+                        <!-- Firing Laser Beam (Hidden until active) -->
+                        <line id="st2-laser-beam" x1="685" y1="260" x2="770" y2="260" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" opacity="0" filter="url(#glowCyan)" />
+
+                        <!-- Logic Badge -->
+                        <rect x="390" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.5" />
+                        <text x="525" y="347" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">
+                            גרירה: <tspan direction="ltr" font-family="Consolas" font-weight="bold">A → B ≡ ¬A ∨ B</tspan>
+                        </text>
+                    </g>
+
+                    <!-- ========================================================================= -->
+                    <!-- STATION 3: OPTICAL PRISM & PLASMA REACTOR (700 to 1050)                   -->
+                    <!-- ========================================================================= -->
+                    <g id="st3-group">
+                        <!-- Optical Crystal Prism -->
+                        <polygon id="st3-prism" points="770,230 795,280 745,280" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2" opacity="0.9" />
+
+                        <!-- Refracted Energy Beam into Reactor -->
+                        <line id="st3-refract-beam" x1="770" y1="260" x2="820" y2="210" stroke="#34d399" stroke-width="4" stroke-dasharray="3,3" opacity="0" />
+
+                        <!-- Chemical Reagents: Sodium A & Water B Injectors -->
+                        <!-- Flask A (Sodium) -->
+                        <rect x="805" y="90" width="35" height="55" rx="6" fill="#090d16" stroke="#f59e0b" stroke-width="1.5" />
+                        <rect x="810" y="110" width="25" height="30" fill="#f59e0b" opacity="0.6" />
+                        <text x="822" y="105" fill="#f59e0b" font-size="9" text-anchor="middle" font-weight="bold">נתרן A</text>
+
+                        <!-- Flask B (Water) -->
+                        <rect x="850" y="90" width="35" height="55" rx="6" fill="#090d16" stroke="#06b6d4" stroke-width="1.5" />
+                        <rect x="855" y="110" width="25" height="30" fill="#06b6d4" opacity="0.6" />
+                        <text x="867" y="105" fill="#06b6d4" font-size="9" text-anchor="middle" font-weight="bold">מים B</text>
+
+                        <!-- Giant High-Tech Plasma Reactor Tube -->
+                        <rect x="805" y="155" width="125" height="150" rx="18" fill="#022c22" stroke="#10b981" stroke-width="2.5" id="st3-reactor-border" />
+                        
+                        <!-- Swirling Plasma Vortex (animated on active) -->
+                        <ellipse id="st3-plasma-glow" cx="867" cy="230" rx="45" ry="55" fill="url(#plasmaGrad)" opacity="0.25" filter="url(#glowGreen)" />
+                        <circle cx="867" cy="230" r="25" fill="#10b981" opacity="0.5" id="st3-plasma-core" />
+                        <text id="st3-reactor-text" x="867" y="235" fill="#ecfdf5" font-size="11" font-weight="900" text-anchor="middle">STANDBY</text>
+
+                        <!-- Strobe Alarm (shown on critical) -->
+                        <g id="st3-alarm" style="display: none;">
+                            <circle cx="867" cy="145" r="12" fill="#ef4444" filter="url(#glowCyan)" />
+                            <text x="867" y="149" fill="white" font-size="9" font-weight="bold" text-anchor="middle">⚠️</text>
+                        </g>
+
+                        <!-- High-Voltage Copper Conduit to Station 4 -->
+                        <path d="M 930 230 L 1020 230 L 1020 210 L 1060 210" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round" id="st3-power-cable" />
+
+                        <!-- Electrical Spark Arc (Hidden until active) -->
+                        <path id="st3-spark-arc" d="M 930 230 Q 970 210 1020 230 T 1060 210" fill="none" stroke="#34d399" stroke-width="3" opacity="0" filter="url(#glowGreen)" />
+
+                        <!-- Logic Badge -->
+                        <rect x="740" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#047857" stroke-width="1.5" />
+                        <text x="875" y="347" fill="#34d399" font-size="13" font-weight="bold" text-anchor="middle">
+                            דה מורגן 1: <tspan direction="ltr" font-family="Consolas" font-weight="bold">¬(A ∧ B) ≡ ¬A ∨ ¬B</tspan>
+                        </text>
+                    </g>
+
+                    <!-- ========================================================================= -->
+                    <!-- STATION 4: QUANTUM JET TURBINE & LAUNCH (1050 to 1400)                    -->
+                    <!-- ========================================================================= -->
+                    <g id="st4-group">
+                        <!-- Turbine Outer Stator Ring -->
+                        <circle cx="1220" cy="210" r="95" fill="#090d16" stroke="#7e22ce" stroke-width="3" filter="url(#glowPurple)" />
+                        <circle cx="1220" cy="210" r="75" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.5" />
+
+                        <!-- 8-Blade Turbine Rotor (Animated spin) -->
+                        <g id="st4-rotor" transform="translate(1220, 210)">
+                            <circle cx="0" cy="0" r="22" fill="url(#steelGrad)" stroke="#c084fc" stroke-width="2" />
+                            <!-- 8 Blades -->
+                            <path d="M 0 0 L -8 -70 Q 6 -80 12 -70 Z" fill="#c084fc" opacity="0.85" />
+                            <path d="M 0 0 L -8 70 Q 6 80 12 70 Z" fill="#c084fc" opacity="0.85" />
+                            <path d="M 0 0 L -70 -8 Q -80 6 -70 12 Z" fill="#c084fc" opacity="0.85" />
+                            <path d="M 0 0 L 70 -8 Q 80 6 70 12 Z" fill="#c084fc" opacity="0.85" />
+                            <path d="M 0 0 L -45 -45 Q -55 -35 -40 -30 Z" fill="#a855f7" opacity="0.75" />
+                            <path d="M 0 0 L 45 45 Q 55 35 40 30 Z" fill="#a855f7" opacity="0.75" />
+                            <path d="M 0 0 L -45 45 Q -35 55 -30 40 Z" fill="#a855f7" opacity="0.75" />
+                            <path d="M 0 0 L 45 -45 Q 35 -55 30 -40 Z" fill="#a855f7" opacity="0.75" />
+                        </g>
+
+                        <!-- Top Magnetic Brake Clamp (Brake A) -->
+                        <g id="st4-brake-top" transform="translate(1220, 110)">
+                            <rect x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
+                            <text x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם A נעול</text>
+                        </g>
+
+                        <!-- Bottom Magnetic Brake Clamp (Brake B) -->
+                        <g id="st4-brake-bot" transform="translate(1220, 310)">
+                            <rect x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
+                            <text x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם B נעול</text>
+                        </g>
+
+                        <!-- Jet Exhaust Thrust Flames (hidden until full speed) -->
+                        <g id="st4-thrust-flames" opacity="0">
+                            <polygon points="1315,190 1380,210 1315,230" fill="#38bdf8" filter="url(#glowCyan)" />
+                            <polygon points="1315,198 1360,210 1315,222" fill="#ffffff" />
+                        </g>
+
+                        <!-- RPM Readout -->
+                        <rect x="1145" y="45" width="150" height="30" rx="6" fill="#030712" stroke="#6b21a8" stroke-width="1.5" />
+                        <text x="1220" y="65" fill="#c084fc" font-size="12" font-weight="bold" text-anchor="middle" id="st4-rpm-text">TURBINE: 0 RPM</text>
+
+                        <!-- Logic Badge -->
+                        <rect x="1090" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#6b21a8" stroke-width="1.5" />
+                        <text x="1225" y="347" fill="#c084fc" font-size="13" font-weight="bold" text-anchor="middle">
+                            דה מורגן 2: <tspan direction="ltr" font-family="Consolas" font-weight="bold">¬(A ∨ B) ≡ ¬A ∧ ¬B</tspan>
+                        </text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Bottom Consoles Row: 4 Team Cards with Live QR Codes -->
+        <div class="bottom-consoles-row">
+            
+            <!-- TEAM 1 CONSOLE -->
+            <div class="team-console-card" id="card-team-1">
+                <div class="tc-header">
+                    <span class="tc-team-title" style="color: #f59e0b;">⚙️ צוות 1: אלפא</span>
+                    <span class="tc-status" id="status-tag-1">🔴 ממתין</span>
+                </div>
+                <div class="tc-body">
+                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 1">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=1" alt="QR צוות 1">
+                    </div>
+                    <div class="tc-info">
+                        <strong>כספת שני המפתחות</strong><br>
+                        חוק המנוע: שסתום A פתוח <u>וגם</u> שסתום B פתוח.<br>
+                        <button class="tc-riddle-btn" onclick="showRiddle(1)">📜 קרא חידה</button>
+                    </div>
+                </div>
+                <div class="tc-actions">
+                    <button class="btn-solve-card" id="btn-solve-1" onclick="teacherSolveStation(1)">
+                        <span>🔓 הפעל תחנה 1</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TEAM 2 CONSOLE -->
+            <div class="team-console-card" id="card-team-2">
+                <div class="tc-header">
+                    <span class="tc-team-title" style="color: #38bdf8;">🎯 צוות 2: בטא</span>
+                    <span class="tc-status" id="status-tag-2">🔴 ממתין</span>
+                </div>
+                <div class="tc-body">
+                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=2" alt="QR צוות 2">
+                    </div>
+                    <div class="tc-info">
+                        <strong>מלכודת החיישנים</strong><br>
+                        גרירה: אם המחסום מורם אז הלייזר יורה (<span class="math-ltr">A → B</span>).<br>
+                        <button class="tc-riddle-btn" onclick="showRiddle(2)">📜 קרא חידה</button>
+                    </div>
+                </div>
+                <div class="tc-actions">
+                    <button class="btn-solve-card" id="btn-solve-2" onclick="teacherSolveStation(2)">
+                        <span>🔓 הפעל תחנה 2</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TEAM 3 CONSOLE -->
+            <div class="team-console-card" id="card-team-3">
+                <div class="tc-header">
+                    <span class="tc-team-title" style="color: #34d399;">🧪 צוות 3: גמא</span>
+                    <span class="tc-status" id="status-tag-3">🔴 ממתין</span>
+                </div>
+                <div class="tc-body">
+                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=3" alt="QR צוות 3">
+                    </div>
+                    <div class="tc-info">
+                        <strong>כור החומרים המסוכנים</strong><br>
+                        דה-מורגן 1: אסור נתרן וגם מים (<span class="math-ltr">¬(A ∧ B)</span>).<br>
+                        <button class="tc-riddle-btn" onclick="showRiddle(3)">📜 קרא חידה</button>
+                    </div>
+                </div>
+                <div class="tc-actions">
+                    <button class="btn-solve-card" id="btn-solve-3" onclick="teacherSolveStation(3)">
+                        <span>🔓 הפעל תחנה 3</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TEAM 4 CONSOLE -->
+            <div class="team-console-card" id="card-team-4">
+                <div class="tc-header">
+                    <span class="tc-team-title" style="color: #c084fc;">🌀 צוות 4: דלתא</span>
+                    <span class="tc-status" id="status-tag-4">🔴 ממתין</span>
+                </div>
+                <div class="tc-body">
+                    <div class="qr-wrap" title="סרקו בטלפון להפעלת תחנה 4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dotandru76.github.io/ami-logic/?team=4" alt="QR צוות 4">
+                    </div>
+                    <div class="tc-info">
+                        <strong>טורבינת החלל וההמראה</strong><br>
+                        דה-מורגן 2: ביטול כל מעצור (<span class="math-ltr">¬(A ∨ B)</span>).<br>
+                        <button class="tc-riddle-btn" onclick="showRiddle(4)">📜 קרא חידה</button>
+                    </div>
+                </div>
+                <div class="tc-actions">
+                    <button class="btn-solve-card" id="btn-solve-4" onclick="teacherSolveStation(4)">
+                        <span>🔓 הפעל תחנה 4</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Riddle Modal -->
+    <div class="modal-overlay" id="riddleModal" onclick="closeRiddleModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeRiddleModal()">✕</button>
+            <h3 id="modalTitle" style="color: #38bdf8; font-size: 20px; margin-bottom: 12px;"></h3>
+            <div id="modalBody" style="font-size: 15.5px; line-height: 1.7; color: #cbd5e1;"></div>
+        </div>
+    </div>
+
+    <!-- Core Interactive & Animation Engine -->
+    <script>
+        // State
+        const stationsState = { 1: false, 2: false, 3: false, 4: false };
+        let soundEnabled = true;
+        let isMasterRunning = false;
+
+        // Riddles Database
+        const RIDDLES = {
+            1: {
+                title: "⚙️ כתב חידה 1 (צוות אלפא): כספת שני המפתחות ומנוע הקיטור",
+                body: "<strong>הסיפור מהשטח:</strong> מנוע הקיטור נעול בכספת כפולה הדורשת שני מפתחות בטיחות: שסתום A ושסתום B.<br><br>" +
+                      "<strong>כלל המפקד:</strong> 'המנוע יופעל אך ורק אם שסתום A פתוח <u>וגם</u> שסתום B פתוח! אם אפילו אחד מהם סגור – המכונה דוממת לחלוטין'.<br><br>" +
+                      "<strong>המשימה:</strong> מלאו את טבלת האמת והזינו את הפסוק הלוגי המדויק: <span class='math-ltr'>P = A ∧ B</span>."
+            },
+            2: {
+                title: "🎯 כתב חידה 2 (צוות בטא): מלכודת החיישנים ותותח הלייזר",
+                body: "<strong>הסיפור מהשטח:</strong> על מסלול כדור הברזל פועל חוזה אבטחה: 'אם המחסום מורם (A), אז חיישן הלייזר יירה (B)' (<span class='math-ltr'>A → B</span>).<br><br>" +
+                      "<strong>המלכודת הגדולה:</strong> מתי מפרים את החוזה (מצב שקר)? רק אם המחסום הורם אך הלייזר לא ירה! אבל אם המחסום כלל לא הורם (A=F) – החוזה לא הופר כלל (אמת)!<br><br>" +
+                      "<strong>המשימה:</strong> נסחו מחדש את החוזה בעזרת 'לא' ו-'או' בלבד: <span class='math-ltr'>A → B ≡ ¬A ∨ B</span> כדי להרים את המחסום ולשגר את הלייזר לפריזמה."
+            },
+            3: {
+                title: "🧪 כתב חידה 3 (צוות גמא): כור החומרים המסוכנים (חוק דה-מורגן 1)",
+                body: "<strong>הסיפור מהשטח:</strong> אזעקת חירום בכור הפלזמה! במיכל יש שני חומרים נפיצים: נתרן (A) ומים (B).<br><br>" +
+                      "<strong>כלל הבטיחות העליון:</strong> אסור בשום אופן שגם נתרן וגם מים יהיו ביחד בכור! כלומר: <span class='math-ltr'>¬(A ∧ B)</span>.<br><br>" +
+                      "<strong>חידת הצוות:</strong> כיצד ננסח כלל בטיחות זה עבור מנגנון חירום המופעל על ידי קשר 'או'?<br>" +
+                      "חשבו בהיגיון: כדי שלא יהיו שניהם יחד, מספיק לוודא ש... <strong>או שאין נתרן, או שאין מים!</strong><br><br>" +
+                      "<strong>הנוסחה להפעלה:</strong> <span class='math-ltr'>¬(A ∧ B) ≡ ¬A ∨ ¬B</span>."
+            },
+            4: {
+                title: "🌀 כתב חידה 4 (צוות דלתא): טורבינת החלל ונעילת המעצורים (חוק דה-מורגן 2)",
+                body: "<strong>הסיפור מהשטח:</strong> טורבינת החלל נעולה במקומה על ידי שני מעצורי חירום מגנטיים: בלם A ובלם B.<br><br>" +
+                      "<strong>פקודת הטיסה:</strong> החללית לא תמריא אם מופעל בלם A או מופעל בלם B! כלומר: <span class='math-ltr'>¬(A ∨ B)</span>.<br><br>" +
+                      "<strong>חידת הצוות:</strong> מה חייב להתקיים במציאות כדי שהטורבינה כן תמריא?<br>" +
+                      "חשבו בהיגיון: הטורבינה תמריא אך ורק אם... <strong>גם בלם A לא פועל וגם בלם B לא פועל!</strong><br><br>" +
+                      "<strong>הנוסחה להפעלה:</strong> <span class='math-ltr'>¬(A ∨ B) ≡ ¬A ∧ ¬B</span>."
+            }
+        };
+
+        // Modal triggers
+        function showRiddle(id) {
+            initAudio();
+            const r = RIDDLES[id];
+            document.getElementById('modalTitle').innerHTML = r.title;
+            document.getElementById('modalBody').innerHTML = r.body;
+            document.getElementById('riddleModal').style.display = 'flex';
+        }
+        function showAllRiddles() {
+            initAudio();
+            document.getElementById('modalTitle').innerHTML = "📜 כל 4 כתבי החידה של המכונה המופלאה";
+            let fullHtml = "";
+            for (let i = 1; i <= 4; i++) {
+                fullHtml += `<div style="margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
+                    <h4 style="color:#38bdf8; margin-bottom:6px;">${RIDDLES[i].title}</h4>
+                    <p>${RIDDLES[i].body}</p>
+                </div>`;
+            }
+            document.getElementById('modalBody').innerHTML = fullHtml;
+            document.getElementById('riddleModal').style.display = 'flex';
+        }
+        function closeRiddleModal() {
+            document.getElementById('riddleModal').style.display = 'none';
+        }
+
+        // Web Audio Synthesizer
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        function playSteamHiss() {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const bufferSize = audioCtx.sampleRate * 0.8;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(1400, audioCtx.currentTime);
+                filter.Q.setValueAtTime(2, audioCtx.currentTime);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            } catch(e){}
+        }
+        function playLaserSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.35);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            } catch(e){}
+        }
+        function playClankSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "square";
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } catch(e){}
+        }
+        function playVictoryChime() {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((f, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(f, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.12 + 0.6);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.12);
+                    osc.stop(audioCtx.currentTime + idx * 0.12 + 0.6);
+                });
+            } catch(e){}
+        }
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btnSound').innerText = soundEnabled ? "🔊 צלילים: פועל" : "🔇 צלילים: כבוי";
+        }
+
+        // Station Visual Activation Functions
+        function activateStation1() {
+            stationsState[1] = true;
+            document.getElementById('card-team-1').classList.add('unlocked');
+            document.getElementById('status-tag-1').className = "tc-status ok";
+            document.getElementById('status-tag-1').innerText = "🟢 מופעל!";
+            document.getElementById('btn-solve-1').classList.add('success');
+            document.getElementById('btn-solve-1').innerText = "✓ מנוע פועל";
+
+            // Visuals
+            playSteamHiss();
+            document.getElementById('st1-gear-1').classList.add('gear-spinning');
+            document.getElementById('st1-gear-2').classList.add('gear-spinning-rev');
+            document.getElementById('st1-gauge-needle').setAttribute('x2', '80');
+            document.getElementById('st1-gauge-needle').setAttribute('y2', '175');
+
+            // Steam cloud puff
+            const cloud = document.getElementById('st1-steam-cloud');
+            cloud.style.animation = 'steamPuff 1.5s infinite';
+        }
+
+        function activateStation2() {
+            stationsState[2] = true;
+            document.getElementById('card-team-2').classList.add('unlocked');
+            document.getElementById('status-tag-2').className = "tc-status ok";
+            document.getElementById('status-tag-2').innerText = "🟢 מופעל!";
+            document.getElementById('btn-solve-2').classList.add('success');
+            document.getElementById('btn-solve-2').innerText = "✓ שער מורם ולייזר יורה";
+
+            // Lift gate
+            playClankSound();
+            document.getElementById('st2-gate').setAttribute('transform', 'translate(470, 95)');
+
+            // Roll marble down track
+            const marble = document.getElementById('st2-marble');
+            marble.style.transition = 'all 1.6s cubic-bezier(0.25, 1, 0.5, 1)';
+            marble.setAttribute('cx', '625');
+            marble.setAttribute('cy', '283');
+
+            // Fire laser after marble reaches bottom
+            setTimeout(() => {
+                playLaserSound();
+                const beam = document.getElementById('st2-laser-beam');
+                beam.style.opacity = '1';
+                beam.classList.add('laser-active');
+                document.getElementById('st2-switch-led').setAttribute('fill', '#38bdf8');
+            }, 1200);
+        }
+
+        function activateStation3() {
+            stationsState[3] = true;
+            document.getElementById('card-team-3').classList.add('unlocked');
+            document.getElementById('status-tag-3').className = "tc-status ok";
+            document.getElementById('status-tag-3').innerText = "🟢 מופעל!";
+            document.getElementById('btn-solve-3').classList.add('success');
+            document.getElementById('btn-solve-3').innerText = "✓ כור פלזמה יציב";
+
+            // Refract beam from prism into reactor
+            document.getElementById('st3-refract-beam').style.opacity = '1';
+
+            // Stabilize plasma
+            const glow = document.getElementById('st3-plasma-glow');
+            glow.style.opacity = '0.7';
+            glow.classList.add('plasma-active');
+            document.getElementById('st3-reactor-text').innerText = "SAFE FUSION";
+            document.getElementById('st3-reactor-text').setAttribute('fill', '#a7f3d0');
+            document.getElementById('st3-reactor-border').setAttribute('stroke', '#34d399');
+
+            // Electrical Arc to Station 4
+            setTimeout(() => {
+                const arc = document.getElementById('st3-spark-arc');
+                arc.style.opacity = '1';
+                arc.style.animation = 'laserFlicker 0.2s infinite';
+            }, 500);
+        }
+
+        function activateStation4() {
+            stationsState[4] = true;
+            document.getElementById('card-team-4').classList.add('unlocked');
+            document.getElementById('status-tag-4').className = "tc-status ok";
+            document.getElementById('status-tag-4').innerText = "🟢 מופעל!";
+            document.getElementById('btn-solve-4').classList.add('success');
+            document.getElementById('btn-solve-4').innerText = "✓ טורבינה ב-100%";
+
+            // Release Magnetic Brakes
+            playClankSound();
+            document.getElementById('st4-brake-top').setAttribute('transform', 'translate(1220, 80)');
+            document.getElementById('st4-brake-bot').setAttribute('transform', 'translate(1220, 340)');
+
+            // Spin Turbine to 100%
+            const rotor = document.getElementById('st4-rotor');
+            rotor.classList.add('gear-spinning');
+            rotor.style.animationDuration = '0.3s';
+
+            // Ignite Jet Flames
+            document.getElementById('st4-thrust-flames').style.opacity = '1';
+            document.getElementById('st4-rpm-text').innerText = "TURBINE: 48,000 RPM (100%)";
+            document.getElementById('st4-rpm-text').setAttribute('fill', '#4ade80');
+
+            // Fanfare
+            playVictoryChime();
+            launchConfetti();
+        }
+
+        // Teacher Fast Solve Trigger
+        function teacherSolveStation(num) {
+            initAudio();
+            if (num === 1) activateStation1();
+            if (num === 2) activateStation2();
+            if (num === 3) activateStation3();
+            if (num === 4) activateStation4();
+        }
+
+        // Epic Sequential Master Chain Reaction
+        function runMasterChainReaction() {
+            if (isMasterRunning) return;
+            isMasterRunning = true;
+            initAudio();
+
+            // 0s: Station 1 Steam & Gears
+            activateStation1();
+
+            // 3.0s: Station 2 Marble & Gate & Laser
+            setTimeout(() => {
+                activateStation2();
+            }, 3000);
+
+            // 6.5s: Station 3 Plasma Fusion
+            setTimeout(() => {
+                activateStation3();
+            }, 6500);
+
+            // 9.5s: Station 4 Turbine & Victory
+            setTimeout(() => {
+                activateStation4();
+                isMasterRunning = false;
+            }, 9500);
+        }
+
+        // Realtime MQTT Sync with Phones
+        const ROOM = "ami-asaf-logic-2026";
+        let mqttClient = null;
+
+        function connectMQTT() {
+            try {
+                mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', {
+                    clientId: 'ami_projector_' + Math.random().toString(16).substr(2, 8),
+                    keepalive: 60
+                });
+
+                mqttClient.on('connect', () => {
+                    mqttClient.subscribe(`${ROOM}/unlock`);
+                    console.log("Teacher screen connected to MQTT broker");
+                });
+
+                mqttClient.on('message', (topic, message) => {
+                    try {
+                        const data = JSON.parse(message.toString());
+                        if (data && data.team) {
+                            teacherSolveStation(data.team);
+                        }
+                    } catch(e){}
+                });
+            } catch(e){}
+        }
+
+        // 10-Minute Timer
+        let timerSeconds = 600;
+        let timerInterval = null;
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60);
+            const s = timerSeconds % 60;
+            document.getElementById('timerDigits').innerText = 
+                `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        function toggleTimer() {
+            initAudio();
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                document.getElementById('btnTimer').innerText = "המשך";
+            } else {
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                }, 1000);
+                document.getElementById('btnTimer').innerText = "השהה";
+            }
+        }
+        function resetTimer() {
+            initAudio();
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerSeconds = 600;
+            updateTimerDisplay();
+            document.getElementById('btnTimer').innerText = "הפעל";
+        }
+
+        // Full Screen Confetti Particle System
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#f59e0b', '#38bdf8', '#10b981', '#a855f7', '#ef4444', '#ec4899', '#ffffff'];
+
+            for (let i = 0; i < 180; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: -20 - Math.random() * 200,
+                    size: 6 + Math.random() * 8,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: 3 + Math.random() * 5,
+                    rot: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 10
+                });
+            }
+
+            let animId;
+            let start = Date.now();
+            function renderConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rot += p.vRot;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+                    ctx.restore();
+                });
+
+                if (Date.now() - start < 7000) {
+                    animId = requestAnimationFrame(renderConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            renderConfetti();
+        }
+
+        // Storage Event Listener (for local phone testing on same network)
+        window.addEventListener('storage', (e) => {
+            if (e.key && e.key.startsWith('ami_unlocked_team_')) {
+                const teamNum = parseInt(e.key.replace('ami_unlocked_team_', ''));
+                if (teamNum >= 1 && teamNum <= 4) {
+                    teacherSolveStation(teamNum);
+                }
+            }
+        });
+
+        // Initialize
+        updateTimerDisplay();
+        connectMQTT();
+    </script>
+</body>
+</html>
