@@ -1080,7 +1080,7 @@
                 beam.style.opacity = '1';
                 beam.classList.add('laser-active');
                 document.getElementById('st2-switch-led').setAttribute('fill', '#38bdf8');
-            }, 1200);
+            }, 400);
         }
 
         function activateStation3() {
@@ -1098,7 +1098,7 @@
             const glow = document.getElementById('st3-plasma-glow');
             glow.style.opacity = '0.7';
             glow.classList.add('plasma-active');
-            document.getElementById('st3-reactor-text').innerText = "SAFE FUSION";
+            document.getElementById('st3-reactor-text').textContent = "SAFE FUSION";
             document.getElementById('st3-reactor-text').setAttribute('fill', '#a7f3d0');
             document.getElementById('st3-reactor-border').setAttribute('stroke', '#34d399');
 
@@ -1130,7 +1130,7 @@
 
             // Ignite Jet Flames
             document.getElementById('st4-thrust-flames').style.opacity = '1';
-            document.getElementById('st4-rpm-text').innerText = "TURBINE: 48,000 RPM (100%)";
+            document.getElementById('st4-rpm-text').textContent = "TURBINE: 48,000 RPM (100%)";
             document.getElementById('st4-rpm-text').setAttribute('fill', '#4ade80');
 
             // Fanfare
