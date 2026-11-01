@@ -371,6 +371,52 @@
         .laser-active {
             animation: laserFlicker 0.12s infinite;
         }
+
+        /* Enhanced Mechanical Keyframes */
+        @keyframes pistonStroke {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(12px); }
+        }
+        @keyframes sparkFlow {
+            0% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes flameRoar {
+            0%, 100% { transform: scaleX(1) scaleY(1); opacity: 0.92; filter: drop-shadow(0 0 8px #38bdf8); }
+            50% { transform: scaleX(1.18) scaleY(1.3); opacity: 1; filter: drop-shadow(0 0 20px #0284c7); }
+        }
+        @keyframes needleShake {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+        @keyframes pulseReactor {
+            0%, 100% { filter: drop-shadow(0 0 10px #10b981); }
+            50% { filter: drop-shadow(0 0 26px #34d399); }
+        }
+        @keyframes steamPuff2 {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            30% { opacity: 0.85; }
+            100% { transform: translateY(-45px) scale(1.8); opacity: 0; }
+        }
+
+        .piston-pumping {
+            animation: pistonStroke 0.45s infinite ease-in-out;
+        }
+        .sparks-traveling {
+            stroke-dasharray: 8, 4;
+            animation: sparkFlow 0.35s infinite linear;
+        }
+        .flames-roaring {
+            animation: flameRoar 0.12s infinite alternate ease-in-out;
+            transform-origin: 1315px 210px;
+        }
+        .reactor-pulsing {
+            animation: pulseReactor 0.9s infinite alternate;
+        }
+        .needle-quiver {
+            animation: needleShake 0.12s infinite ease-in-out;
+            transform-origin: 70px 185px;
+        }
         .plasma-active {
             animation: rotateAroundOrigin 4s infinite linear;
             transform-origin: 0px 0px;
@@ -478,19 +524,19 @@
             <div class="machine-headers-row">
                 <div class="station-header-cell st-1">
                     <div class="sh-title"><span>1. מנוע הקיטור והשיניים</span></div>
-                    <span class="sh-tag">צוות אלפא (AND / OR)</span>
+                    <span class="sh-tag">צוות אלפא (AND)&lrm;</span>
                 </div>
                 <div class="station-header-cell st-2">
                     <div class="sh-title"><span>2. שער הלייזר והגרירה</span></div>
-                    <span class="sh-tag">צוות בטא (A → B ≡ ¬A ∨ B)</span>
+                    <span class="sh-tag">צוות בטא (<span class="math-ltr">A → B ≡ ¬A ∨ B</span>)&lrm;</span>
                 </div>
                 <div class="station-header-cell st-3">
                     <div class="sh-title"><span>3. כור הפלזמה הכימי</span></div>
-                    <span class="sh-tag">צוות גמא (דה מורגן 1: ¬(A ∧ B))</span>
+                    <span class="sh-tag">צוות גמא (דה-מורגן 1: <span class="math-ltr">¬(A ∧ B)</span>)&lrm;</span>
                 </div>
                 <div class="station-header-cell st-4">
                     <div class="sh-title"><span>4. טורבינת העל וההמראה</span></div>
-                    <span class="sh-tag">צוות דלתא (דה מורגן 2: ¬(A ∨ B))</span>
+                    <span class="sh-tag">צוות דלתא (דה-מורגן 2: <span class="math-ltr">¬(A ∨ B)</span>)&lrm;</span>
                 </div>
             </div>
 
@@ -567,14 +613,16 @@
                         <path d="M 125 150 L 165 150 L 165 210 L 180 210" fill="none" stroke="#475569" stroke-width="10" stroke-linecap="round" />
                         
                         <!-- Dual Valve Knobs A & B on pipe -->
-                        <circle cx="145" cy="150" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
-                        <text x="145" y="154" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">A</text>
-                        <circle cx="165" cy="180" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
-                        <text x="165" y="184" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">B</text>
+                        <circle id="st1-valve-a" cx="145" cy="150" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+                        <text id="st1-valve-a-txt" x="145" y="154" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">A</text>
+                        <circle id="st1-valve-b" cx="165" cy="180" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+                        <text id="st1-valve-b-txt" x="165" y="184" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">B</text>
 
-                        <!-- Piston Chamber -->
+                        <!-- Piston Chamber & Animated Rod -->
                         <rect x="180" y="198" width="55" height="24" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
-                        <rect id="st1-piston-rod" x="220" y="206" width="40" height="8" rx="2" fill="url(#steelGrad)" />
+                        <g id="st1-piston-wrap">
+                            <rect id="st1-piston-rod" x="220" y="206" width="38" height="8" rx="2" fill="url(#steelGrad)" />
+                        </g>
 
                         <!-- Gear 1 (Main Brass Gear) - Wrapped in position group -->
                         <g transform="translate(250, 210)">
@@ -615,7 +663,8 @@
                         </g>
 
                         <!-- Steam cloud particle effect -->
-                        <circle id="st1-steam-cloud" cx="125" cy="110" r="14" fill="#e2e8f0" opacity="0" />
+                        <circle id="st1-steam-cloud-1" cx="125" cy="110" r="14" fill="#e2e8f0" opacity="0" />
+                        <circle id="st1-steam-cloud-2" cx="130" cy="98" r="16" fill="#e2e8f0" opacity="0" />
 
                         <!-- Logic Badge -->
                         <rect x="40" y="325" width="260" height="34" rx="8" fill="#0f172a" stroke="#b45309" stroke-width="1.5" />
@@ -629,7 +678,7 @@
                     <!-- ========================================================================= -->
                     <g id="st2-group">
                         <!-- Lever Trigger Catch (hit by Station 1 hammer) -->
-                        <line id="st2-catch-lever" x1="355" y1="205" x2="380" y2="175" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" />
+                        <line id="st2-catch-lever" x1="355" y1="205" x2="380" y2="175" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" style="transition: all 0.4s ease-out;" />
 
                         <!-- Marble Holding Cradle -->
                         <rect x="375" y="130" width="30" height="14" rx="4" fill="#334155" stroke="#64748b" />
@@ -687,13 +736,17 @@
                         <!-- Chemical Reagents: Sodium A & Water B Injectors -->
                         <!-- Flask A (Sodium) -->
                         <rect x="805" y="90" width="35" height="55" rx="6" fill="#090d16" stroke="#f59e0b" stroke-width="1.5" />
-                        <rect x="810" y="110" width="25" height="30" fill="#f59e0b" opacity="0.6" />
+                        <rect id="st3-flask-a-fill" x="810" y="110" width="25" height="30" fill="#f59e0b" opacity="0.6" />
                         <text x="822" y="105" fill="#f59e0b" font-size="9" text-anchor="middle" font-weight="bold">נתרן A</text>
+                        <!-- Reagent Valve A LED -->
+                        <circle id="st3-valve-a-led" cx="822" cy="150" r="4" fill="#334155" stroke="#f59e0b" stroke-width="1" />
 
                         <!-- Flask B (Water) -->
                         <rect x="850" y="90" width="35" height="55" rx="6" fill="#090d16" stroke="#06b6d4" stroke-width="1.5" />
-                        <rect x="855" y="110" width="25" height="30" fill="#06b6d4" opacity="0.6" />
+                        <rect id="st3-flask-b-fill" x="855" y="110" width="25" height="30" fill="#06b6d4" opacity="0.6" />
                         <text x="867" y="105" fill="#06b6d4" font-size="9" text-anchor="middle" font-weight="bold">מים B</text>
+                        <!-- Reagent Valve B LED -->
+                        <circle id="st3-valve-b-led" cx="867" cy="150" r="4" fill="#334155" stroke="#ef4444" stroke-width="1" />
 
                         <!-- Giant High-Tech Plasma Reactor Tube -->
                         <rect x="805" y="155" width="125" height="150" rx="18" fill="#022c22" stroke="#10b981" stroke-width="2.5" id="st3-reactor-border" />
@@ -711,7 +764,7 @@
                         <path d="M 930 230 L 1020 230 L 1020 210 L 1060 210" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round" id="st3-power-cable" />
 
                         <!-- Electrical Spark Arc (Hidden until active) -->
-                        <path id="st3-spark-arc" d="M 930 230 Q 970 210 1020 230 T 1060 210" fill="none" stroke="#34d399" stroke-width="3" opacity="0" filter="url(#glowGreen)" />
+                        <path id="st3-spark-arc" d="M 930 230 Q 970 210 1020 230 T 1060 210" fill="none" stroke="#34d399" stroke-width="4" opacity="0" filter="url(#glowGreen)" class="sparks-traveling" />
 
                         <!-- Logic Badge -->
                         <rect x="740" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#047857" stroke-width="1.5" />
@@ -745,26 +798,26 @@
                         </g>
 
                         <!-- Top Magnetic Brake Clamp (Brake A) -->
-                        <g id="st4-brake-top" transform="translate(1220, 110)">
-                            <rect x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
-                            <text x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם A נעול</text>
+                        <g id="st4-brake-top" transform="translate(1220, 105)" style="transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            <rect id="st4-brake-top-rect" x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
+                            <text id="st4-brake-top-text" x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם A נעול</text>
                         </g>
 
                         <!-- Bottom Magnetic Brake Clamp (Brake B) -->
-                        <g id="st4-brake-bot" transform="translate(1220, 310)">
-                            <rect x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
-                            <text x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם B נעול</text>
+                        <g id="st4-brake-bot" transform="translate(1220, 315)" style="transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            <rect id="st4-brake-bot-rect" x="-35" y="-12" width="70" height="24" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
+                            <text id="st4-brake-bot-text" x="0" y="4" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">בלם B נעול</text>
                         </g>
 
                         <!-- Jet Exhaust Thrust Flames (hidden until full speed) -->
-                        <g id="st4-thrust-flames" opacity="0">
+                        <g id="st4-thrust-flames" opacity="0" class="flames-roaring">
                             <polygon points="1315,190 1385,210 1315,230" fill="#38bdf8" filter="url(#glowCyan)" />
                             <polygon points="1315,198 1365,210 1315,222" fill="#ffffff" />
                         </g>
 
-                        <!-- RPM Readout -->
-                        <rect x="1145" y="45" width="150" height="30" rx="6" fill="#030712" stroke="#6b21a8" stroke-width="1.5" />
-                        <text x="1220" y="65" fill="#c084fc" font-size="12" font-weight="bold" text-anchor="middle" id="st4-rpm-text">TURBINE: 0 RPM</text>
+                        <!-- RPM Readout (Positioned high to prevent overlap with released brake) -->
+                        <rect x="1145" y="18" width="150" height="26" rx="6" fill="#030712" stroke="#6b21a8" stroke-width="1.5" />
+                        <text x="1220" y="35" fill="#c084fc" font-size="12" font-weight="bold" text-anchor="middle" id="st4-rpm-text">TURBINE: 0 RPM</text>
 
                         <!-- Logic Badge -->
                         <rect x="1090" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#6b21a8" stroke-width="1.5" />
@@ -814,7 +867,7 @@
                     </div>
                     <div class="tc-info">
                         <strong>מלכודת החיישנים</strong><br>
-                        גרירה: אם המחסום מורם אז הלייזר יורה (<span class="math-ltr">A → B</span>).<br>
+                        גרירה: אם המחסום מורם אז הלייזר יורה (<span class="math-ltr">A → B</span>)&lrm;.<br>
                         <button class="tc-riddle-btn" onclick="showRiddle(2)">📜 קרא חידה</button>
                     </div>
                 </div>
@@ -837,7 +890,7 @@
                     </div>
                     <div class="tc-info">
                         <strong>כור החומרים המסוכנים</strong><br>
-                        דה-מורגן 1: אסור נתרן וגם מים (<span class="math-ltr">¬(A ∧ B)</span>).<br>
+                        דה-מורגן 1: אסור נתרן וגם מים (<span class="math-ltr">¬(A ∧ B)</span>)&lrm;.<br>
                         <button class="tc-riddle-btn" onclick="showRiddle(3)">📜 קרא חידה</button>
                     </div>
                 </div>
@@ -860,7 +913,7 @@
                     </div>
                     <div class="tc-info">
                         <strong>טורבינת החלל וההמראה</strong><br>
-                        דה-מורגן 2: ביטול כל מעצור (<span class="math-ltr">¬(A ∨ B)</span>).<br>
+                        דה-מורגן 2: ביטול כל מעצור (<span class="math-ltr">¬(A ∨ B)</span>)&lrm;.<br>
                         <button class="tc-riddle-btn" onclick="showRiddle(4)">📜 קרא חידה</button>
                     </div>
                 </div>
@@ -1044,15 +1097,39 @@
 
             // Visuals
             playSteamHiss();
+            
+            // Valves turn bright green (Both Valves A and B OPEN -> AND condition satisfied!)
+            const vA = document.getElementById('st1-valve-a');
+            const vB = document.getElementById('st1-valve-b');
+            if (vA && vB) {
+                vA.setAttribute('fill', '#064e3b');
+                vA.setAttribute('stroke', '#10b981');
+                document.getElementById('st1-valve-a-txt').setAttribute('fill', '#a7f3d0');
+                vB.setAttribute('fill', '#064e3b');
+                vB.setAttribute('stroke', '#10b981');
+                document.getElementById('st1-valve-b-txt').setAttribute('fill', '#a7f3d0');
+            }
+
+            // Piston pumping back and forth
+            const pWrap = document.getElementById('st1-piston-wrap');
+            if (pWrap) pWrap.classList.add('piston-pumping');
+
+            // Gears spinning
             document.getElementById('st1-gear-1').classList.add('gear-spinning');
             document.getElementById('st1-gear-2').classList.add('gear-spinning-rev');
             document.getElementById('st1-hammer').classList.add('gear-spinning-rev');
-            document.getElementById('st1-gauge-needle').setAttribute('x2', '80');
-            document.getElementById('st1-gauge-needle').setAttribute('y2', '175');
 
-            // Steam cloud puff
-            const cloud = document.getElementById('st1-steam-cloud');
-            cloud.style.animation = 'steamPuff 1.5s infinite';
+            // Gauge needle quivers in high green zone
+            const needle = document.getElementById('st1-gauge-needle');
+            needle.setAttribute('x2', '82');
+            needle.setAttribute('y2', '172');
+            needle.classList.add('needle-quiver');
+
+            // Steam cloud puffs
+            const c1 = document.getElementById('st1-steam-cloud-1');
+            const c2 = document.getElementById('st1-steam-cloud-2');
+            if (c1) c1.style.animation = 'steamPuff 1.2s infinite';
+            if (c2) c2.style.animation = 'steamPuff2 1.4s infinite';
         }
 
         function activateStation2() {
@@ -1063,24 +1140,55 @@
             document.getElementById('btn-solve-2').classList.add('success');
             document.getElementById('btn-solve-2').innerText = "✓ שער מורם ולייזר יורה";
 
-            // Lift gate
+            // Station 1 hammer strikes lever: lever tilts down
+            const lever = document.getElementById('st2-catch-lever');
+            if (lever) {
+                lever.setAttribute('x2', '385');
+                lever.setAttribute('y2', '205');
+            }
+
+            // Red gate lifts smoothly up
             playClankSound();
-            document.getElementById('st2-gate').setAttribute('transform', 'translate(470, 95)');
+            document.getElementById('st2-gate').setAttribute('transform', 'translate(470, 75)');
 
-            // Roll marble down track
+            // Physics-based 3-step marble roll down zigzag ramps
             const marble = document.getElementById('st2-marble');
-            marble.style.transition = 'all 1.6s cubic-bezier(0.25, 1, 0.5, 1)';
-            marble.setAttribute('cx', '625');
-            marble.setAttribute('cy', '283');
+            
+            // Step 1: Ramp 1 roll to right edge (550, 172)
+            marble.style.transition = 'cx 0.5s ease-in, cy 0.5s ease-in';
+            marble.setAttribute('cx', '550');
+            marble.setAttribute('cy', '172');
 
-            // Fire laser after marble reaches bottom
+            // Step 2: Ramp 2 roll left to (435, 232)
+            setTimeout(() => {
+                marble.style.transition = 'cx 0.45s ease-in-out, cy 0.45s ease-in-out';
+                marble.setAttribute('cx', '435');
+                marble.setAttribute('cy', '232');
+            }, 500);
+
+            // Step 3: Ramp 3 roll right into switch (620, 282)
+            setTimeout(() => {
+                marble.style.transition = 'cx 0.45s ease-out, cy 0.45s ease-out';
+                marble.setAttribute('cx', '620');
+                marble.setAttribute('cy', '282');
+            }, 950);
+
+            // Impact with switch at 1400ms
+            setTimeout(() => {
+                playClankSound();
+                const sw = document.getElementById('st2-switch-led');
+                sw.setAttribute('fill', '#38bdf8');
+                sw.setAttribute('stroke', '#bae6fd');
+                document.getElementById('st2-laser-core').setAttribute('fill', '#0284c7');
+            }, 1400);
+
+            // Fire intense laser cannon into Station 3 prism at 1550ms
             setTimeout(() => {
                 playLaserSound();
                 const beam = document.getElementById('st2-laser-beam');
                 beam.style.opacity = '1';
                 beam.classList.add('laser-active');
-                document.getElementById('st2-switch-led').setAttribute('fill', '#38bdf8');
-            }, 400);
+            }, 1550);
         }
 
         function activateStation3() {
@@ -1091,23 +1199,36 @@
             document.getElementById('btn-solve-3').classList.add('success');
             document.getElementById('btn-solve-3').innerText = "✓ כור פלזמה יציב";
 
+            playPowerUpSound();
+
             // Refract beam from prism into reactor
             document.getElementById('st3-refract-beam').style.opacity = '1';
 
-            // Stabilize plasma
-            const glow = document.getElementById('st3-plasma-glow');
-            glow.style.opacity = '0.7';
-            glow.classList.add('plasma-active');
-            document.getElementById('st3-reactor-text').textContent = "SAFE FUSION";
-            document.getElementById('st3-reactor-text').setAttribute('fill', '#a7f3d0');
-            document.getElementById('st3-reactor-border').setAttribute('stroke', '#34d399');
+            // Chemical reagent safety status (De Morgan: NOT both A and B!)
+            // Sodium valve flashes active amber, Water valve shows secure locked red
+            const vA = document.getElementById('st3-valve-a-led');
+            const vB = document.getElementById('st3-valve-b-led');
+            if (vA) { vA.setAttribute('fill', '#f59e0b'); vA.setAttribute('opacity', '1'); }
+            if (vB) { vB.setAttribute('fill', '#ef4444'); vB.setAttribute('opacity', '1'); }
 
-            // Electrical Arc to Station 4
+            // Stabilize and pulse plasma vortex
+            const glow = document.getElementById('st3-plasma-glow');
+            glow.style.opacity = '0.85';
+            glow.classList.add('plasma-active');
+            
+            const reactorTube = document.getElementById('st3-reactor-border');
+            reactorTube.setAttribute('stroke', '#34d399');
+            reactorTube.classList.add('reactor-pulsing');
+
+            const rText = document.getElementById('st3-reactor-text');
+            rText.textContent = "SAFE FUSION 100%";
+            rText.setAttribute('fill', '#a7f3d0');
+
+            // High-voltage Electrical Sparks travel along conduit to Station 4
             setTimeout(() => {
                 const arc = document.getElementById('st3-spark-arc');
                 arc.style.opacity = '1';
-                arc.style.animation = 'laserFlicker 0.2s infinite';
-            }, 500);
+            }, 400);
         }
 
         function activateStation4() {
@@ -1118,27 +1239,53 @@
             document.getElementById('btn-solve-4').classList.add('success');
             document.getElementById('btn-solve-4').innerText = "✓ טורבינה ב-100%";
 
-            // Release Magnetic Brakes
+            // Release Magnetic Brakes A and B (Proving De Morgan 2: ¬A ∧ ¬B)
             playClankSound();
-            document.getElementById('st4-brake-top').setAttribute('transform', 'translate(1220, 75)');
-            document.getElementById('st4-brake-bot').setAttribute('transform', 'translate(1220, 345)');
+            const bTop = document.getElementById('st4-brake-top');
+            const bBot = document.getElementById('st4-brake-bot');
+            bTop.setAttribute('transform', 'translate(1220, 68)');
+            bBot.setAttribute('transform', 'translate(1220, 355)');
+            
+            // Switch brake appearance to neutralized green
+            document.getElementById('st4-brake-top-rect').setAttribute('fill', '#064e3b');
+            document.getElementById('st4-brake-top-rect').setAttribute('stroke', '#10b981');
+            document.getElementById('st4-brake-top-text').textContent = "בלם A מנוטרל";
+            document.getElementById('st4-brake-top-text').setAttribute('fill', '#6ee7b7');
+
+            document.getElementById('st4-brake-bot-rect').setAttribute('fill', '#064e3b');
+            document.getElementById('st4-brake-bot-rect').setAttribute('stroke', '#10b981');
+            document.getElementById('st4-brake-bot-text').textContent = "בלם B מנוטרל";
+            document.getElementById('st4-brake-bot-text').setAttribute('fill', '#6ee7b7');
 
             // Spin Turbine to 100%
             const rotor = document.getElementById('st4-rotor');
             rotor.classList.add('gear-spinning');
-            rotor.style.animationDuration = '0.25s';
+
+            // Dynamic RPM Speedometer Count-up
+            const rpmText = document.getElementById('st4-rpm-text');
+            rpmText.setAttribute('fill', '#4ade80');
+            let currentRPM = 0;
+            const targetRPM = 48000;
+            const rpmInterval = setInterval(() => {
+                currentRPM += 2400;
+                if (currentRPM >= targetRPM) {
+                    currentRPM = targetRPM;
+                    clearInterval(rpmInterval);
+                    rpmText.textContent = "TURBINE: 48,000 RPM (100%)";
+                } else {
+                    const pct = Math.round((currentRPM / targetRPM) * 100);
+                    rpmText.textContent = `TURBINE: ${currentRPM.toLocaleString()} RPM (${pct}%)`;
+                }
+            }, 50);
 
             // Ignite Jet Flames
             document.getElementById('st4-thrust-flames').style.opacity = '1';
-            document.getElementById('st4-rpm-text').textContent = "TURBINE: 48,000 RPM (100%)";
-            document.getElementById('st4-rpm-text').setAttribute('fill', '#4ade80');
 
-            // Fanfare
+            // Fanfare & Confetti
             playVictoryChime();
             launchConfetti();
         }
 
-        // Teacher Fast Solve Trigger
         function teacherSolveStation(num) {
             initAudio();
             if (num === 1) activateStation1();
@@ -1156,26 +1303,22 @@
             // 0s: Station 1 Steam & Gears
             activateStation1();
 
-            // 3.0s: Station 2 Marble & Gate & Laser
+            // 2.8s: Station 2 Marble & Gate & Laser
             setTimeout(() => {
                 activateStation2();
-            }, 3000);
+            }, 2800);
 
-            // 6.5s: Station 3 Plasma Fusion
+            // 5.8s: Station 3 Plasma Fusion
             setTimeout(() => {
                 activateStation3();
-            }, 6500);
+            }, 5800);
 
-            // 9.5s: Station 4 Turbine & Victory
+            // 8.5s: Station 4 Turbine & Victory
             setTimeout(() => {
                 activateStation4();
                 isMasterRunning = false;
-            }, 9500);
+            }, 8500);
         }
-
-        // Realtime MQTT Sync with Phones
-        const ROOM = "ami-asaf-logic-2026";
-        let mqttClient = null;
 
         function connectMQTT() {
             try {
