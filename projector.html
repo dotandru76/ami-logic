@@ -764,7 +764,7 @@
                         <path d="M 930 230 L 1020 230 L 1020 210 L 1060 210" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round" id="st3-power-cable" />
 
                         <!-- Electrical Spark Arc (Hidden until active) -->
-                        <path id="st3-spark-arc" d="M 930 230 Q 970 210 1020 230 T 1060 210" fill="none" stroke="#34d399" stroke-width="4" opacity="0" filter="url(#glowGreen)" class="sparks-traveling" />
+                        <path id="st3-spark-arc" d="M 930 230 Q 970 210 1020 230 T 1060 210" fill="none" stroke="#34d399" stroke-width="4" opacity="0" filter="url(#glowGreen)" style="display: none;" />
 
                         <!-- Logic Badge -->
                         <rect x="740" y="325" width="270" height="34" rx="8" fill="#0f172a" stroke="#047857" stroke-width="1.5" />
@@ -810,7 +810,7 @@
                         </g>
 
                         <!-- Jet Exhaust Thrust Flames (hidden until full speed) -->
-                        <g id="st4-thrust-flames" opacity="0" class="flames-roaring">
+                        <g id="st4-thrust-flames" style="display: none; opacity: 0;">
                             <polygon points="1315,190 1385,210 1315,230" fill="#38bdf8" filter="url(#glowCyan)" />
                             <polygon points="1315,198 1365,210 1315,222" fill="#ffffff" />
                         </g>
@@ -1245,7 +1245,9 @@
             // High-voltage Electrical Sparks travel along conduit to Station 4
             setTimeout(() => {
                 const arc = document.getElementById('st3-spark-arc');
+                arc.style.display = 'block';
                 arc.style.opacity = '1';
+                arc.classList.add('sparks-traveling');
             }, 400);
         }
 
@@ -1297,7 +1299,10 @@
             }, 50);
 
             // Ignite Jet Flames
-            document.getElementById('st4-thrust-flames').style.opacity = '1';
+            const flames = document.getElementById('st4-thrust-flames');
+            flames.style.display = 'block';
+            flames.style.opacity = '1';
+            flames.classList.add('flames-roaring');
 
             // Fanfare & Confetti
             playVictoryChime();
